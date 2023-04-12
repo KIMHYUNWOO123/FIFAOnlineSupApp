@@ -1,5 +1,6 @@
 package com.example.domain.usecase
 
+import android.content.SharedPreferences
 import com.example.domain.Repository
 import com.example.domain.SharedPreferencesService
 import com.example.domain.entity.BestRankEntity

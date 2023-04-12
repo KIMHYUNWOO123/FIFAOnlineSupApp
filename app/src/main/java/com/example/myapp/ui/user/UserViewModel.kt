@@ -5,7 +5,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.domain.usecase.MetaDataUseCase
 import com.example.domain.usecase.UserUseCase
+import com.example.myapp.map.BestRankMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -14,9 +16,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
-    private val useCase: UserUseCase
+    private val useCase: UserUseCase,
+    private val metaDataUseCase: MetaDataUseCase,
 ) : ViewModel() {
-
+    private val mapper: BestRankMapper = BestRankMapper()
     private val _userData: MutableLiveData<String> = MutableLiveData("")
     val userData: LiveData<String> = _userData
 
@@ -54,6 +57,9 @@ class UserViewModel @Inject constructor(
             isLoading.postValue(false)
         }) {
             val result = useCase.getBestRank(accessId)
+            val matchTypeDataList = metaDataUseCase.getMatch()
+            Log.d("UserViewModel", "getBestRank: ${mapper.map(result, matchTypeDataList)}")
+
         }.invokeOnCompletion {
             isLoading.postValue(false)
         }
