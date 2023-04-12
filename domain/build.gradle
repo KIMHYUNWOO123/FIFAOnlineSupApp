@@ -1,12 +1,12 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
 }
 
 android {
     namespace 'com.example.domain'
     compileSdk 33
-
     defaultConfig {
         minSdk 24
         targetSdk 33
@@ -57,6 +57,7 @@ dependencies {
 
     // hilt
     implementation "com.google.dagger:hilt-android:2.44"
+    kapt("com.google.dagger:hilt-compiler:2.44")
 
     // room
     implementation "androidx.room:room-runtime:2.5.1"
@@ -64,6 +65,8 @@ dependencies {
 
     // To use Kotlin annotation processing tool (kapt)
     implementation "androidx.room:room-compiler:2.5.1"
-    // To use Kotlin Symbol Processing (KSP)
-    implementation "androidx.room:room-compiler:2.5.1"
+    kapt "androidx.room:room-compiler:2.5.1"
+
+    implementation "org.jetbrains:annotations:23.0.0"
+
 }

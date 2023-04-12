@@ -1,13 +1,13 @@
 package com.example.domain.usecase
 
 import com.example.domain.Repository
+import com.example.domain.SharedPreferencesService
 import com.example.domain.entity.BestRankEntity
-import com.example.domain.entity.MatchTypeList
 import com.example.domain.entity.UserEntity
 import javax.inject.Inject
 
 class UserUseCase @Inject constructor(
-    private val repository: Repository
+    private val repository: Repository,
 ) {
 
     suspend fun getUserData(nickname: String): UserEntity {

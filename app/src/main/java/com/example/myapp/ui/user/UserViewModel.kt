@@ -5,10 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.domain.entity.BestRankEntity
-import com.example.domain.entity.BestRankList
-import com.example.domain.entity.MatchTypeList
-import com.example.domain.entity.UserEntity
 import com.example.domain.usecase.UserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -36,7 +32,7 @@ class UserViewModel @Inject constructor(
     fun getUserData(nickName: String) {
         isLoading.postValue(true)
         viewModelScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, t ->
-            Log.d("Exception", "getUserData: $t")
+            Log.d("UserViewModel", "Exception: $t")
             isLoading.postValue(false)
         }) {
             val result = useCase.getUserData(nickName)

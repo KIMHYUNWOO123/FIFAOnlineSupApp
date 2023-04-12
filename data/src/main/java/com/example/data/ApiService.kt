@@ -8,7 +8,7 @@ import retrofit2.http.Query
 
 interface ApiService {
 
-    @GET("users")
+    @GET("users/")
     suspend fun getUser(
         @Query("nickname") nickname: String
     ): UserEntity

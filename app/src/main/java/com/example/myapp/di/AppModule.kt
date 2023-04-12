@@ -1,20 +1,24 @@
 package com.example.myapp.di
 
+import android.app.Application
+import android.content.Context
+import android.content.SharedPreferences
+import androidx.room.Room
 import com.example.data.ApiService
 import com.example.data.MetaApiService
+import com.example.data.db.MatchTypeDatabase
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
-import java.io.IOException
+import javax.inject.Named
 import javax.inject.Singleton
 
 
@@ -30,15 +34,18 @@ class AppModule {
 
     @Provides
     @Singleton
+    @Named("baseUrl")
     fun baseUrl(): String = "https://api.nexon.co.kr/fifaonline4/v1.0/"
 
     @Provides
     @Singleton
+    @Named("metaBaseUrl")
     fun metaBaseUrl(): String = "https://static.api.nexon.co.kr/fifaonline4/latest/"
 
     @Provides
     @Singleton
-    fun provideApiService(baseUrl: String, gson: Gson, client: OkHttpClient): ApiService {
+    @Named("api")
+    fun provideApiService(@Named("baseUrl") baseUrl: String, gson: Gson, client: OkHttpClient): ApiService {
         return Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(client)
@@ -49,7 +56,8 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideMetaApiService(metaBaseUrl: String, gson: Gson): MetaApiService {
+    @Named("meta")
+    fun provideMetaApiService(@Named("metaBaseUrl") metaBaseUrl: String, gson: Gson): MetaApiService {
         return Retrofit.Builder()
             .baseUrl(metaBaseUrl)
             .addConverterFactory(GsonConverterFactory.create(gson))
@@ -80,5 +88,30 @@ class AppModule {
                 proceed(newRequest)
             }
         }
+    }
+
+    @Provides
+    @Singleton
+    fun provideDatabase(@ApplicationContext context: Context): MatchTypeDatabase =
+        Room.databaseBuilder(
+            context.applicationContext,
+            MatchTypeDatabase::class.java,
+            "MatchTypeDatabase"
+        ).fallbackToDestructiveMigration().build()
+
+    @Provides
+    @Singleton
+    fun provideContext(application: Application): Context {
+        return application
+    }
+
+    @Provides
+    @Singleton
+    fun provideSharedPreference(@ApplicationContext context: Context): SharedPreferences {
+        return context.getSharedPreferences(PREF_MATCH_TIME, Context.MODE_PRIVATE)
+    }
+
+    companion object {
+        const val PREF_MATCH_TIME = "PREF_FIFA"
     }
 }
