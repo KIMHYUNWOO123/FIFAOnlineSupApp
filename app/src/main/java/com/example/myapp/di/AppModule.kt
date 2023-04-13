@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import androidx.room.Room
 import com.example.data.ApiService
 import com.example.data.MetaApiService
+import com.example.data.db.DivisionDatabase
 import com.example.data.db.MatchTypeDatabase
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -92,12 +93,22 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext context: Context): MatchTypeDatabase =
+    fun provideMatchDatabase(@ApplicationContext context: Context): MatchTypeDatabase =
         Room.databaseBuilder(
             context.applicationContext,
             MatchTypeDatabase::class.java,
             "MatchTypeDatabase"
         ).fallbackToDestructiveMigration().build()
+
+    @Provides
+    @Singleton
+    fun provideDivisionDatabase(@ApplicationContext context: Context): DivisionDatabase =
+        Room.databaseBuilder(
+            context.applicationContext,
+            DivisionDatabase::class.java,
+            "DivisionDatabase"
+        ).fallbackToDestructiveMigration().build()
+
 
     @Provides
     @Singleton

@@ -2,6 +2,7 @@ package com.example.data
 
 import com.example.domain.Repository
 import com.example.domain.entity.BestRankEntity
+import com.example.domain.entity.DivisionEntity
 import com.example.domain.entity.MatchTypeEntity
 import com.example.domain.entity.UserEntity
 import javax.inject.Inject
@@ -21,5 +22,9 @@ class RepositoryImpl @Inject constructor(
 
     override suspend fun getMatchData(): List<MatchTypeEntity> {
         return metaApiService.getMatchTypeJson()
+    }
+
+    override suspend fun getDivisionData(): List<DivisionEntity> {
+        return metaApiService.getDivisionJson()
     }
 }

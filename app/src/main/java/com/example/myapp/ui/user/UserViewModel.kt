@@ -11,6 +11,7 @@ import com.example.myapp.map.BestRankMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -50,15 +51,21 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    fun getBestRank(accessId: String) {
+    fun getBestRank() {
         isLoading.postValue(true)
         viewModelScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, t ->
             Log.d("Exception", "getBestRank: $t")
             isLoading.postValue(false)
         }) {
-            val result = useCase.getBestRank(accessId)
-            val matchTypeDataList = metaDataUseCase.getMatch()
-            Log.d("UserViewModel", "getBestRank: ${mapper.map(result, matchTypeDataList)}")
+            val result = useCase.getBestRank(userAccessId.value.toString())
+            val matchTypeDataList = async(Dispatchers.IO) {
+                metaDataUseCase.getMatch()
+            }
+
+            val divisionDataList = async(Dispatchers.IO) {
+                metaDataUseCase.getDivision()
+            }
+            Log.d("UserViewModel", "getBestRank: ${mapper.map(result, matchTypeDataList.await(), divisionDataList.await())}")
 
         }.invokeOnCompletion {
             isLoading.postValue(false)

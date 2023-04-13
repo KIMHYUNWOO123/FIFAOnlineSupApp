@@ -1,8 +1,11 @@
 package com.example.domain.usecase
 
+import android.util.Log
 import com.example.domain.DaoRepository
 import com.example.domain.Repository
 import com.example.domain.SharedPreferencesService
+import com.example.domain.entity.DivisionData
+import com.example.domain.entity.DivisionEntity
 import com.example.domain.entity.MatchTypeData
 import com.example.domain.entity.MatchTypeEntity
 import javax.inject.Inject
@@ -12,6 +15,8 @@ class MetaDataUseCase @Inject constructor(
     private val repository: Repository,
     private val pref: SharedPreferencesService
 ) {
+
+    // Dao
     suspend fun insertMatch(list: List<MatchTypeData>) {
         daoRepository.insertTypeMatch(list)
     }
@@ -24,10 +29,26 @@ class MetaDataUseCase @Inject constructor(
         daoRepository.deleteMatch()
     }
 
+    suspend fun insertDivision(list: List<DivisionData>) {
+        daoRepository.insertDivision(list)
+    }
+
+    suspend fun getDivision(): List<DivisionData> {
+        return daoRepository.getDivision()
+    }
+
+
+    // api
     suspend fun apiMatchData(): List<MatchTypeEntity> {
         return repository.getMatchData()
     }
 
+    suspend fun apiDivisionData(): List<DivisionEntity> {
+        return repository.getDivisionData()
+    }
+
+
+    // pref
     fun setMatchSaveTime(time: String) {
         pref.setMatchSaveTime(time)
     }
@@ -35,4 +56,5 @@ class MetaDataUseCase @Inject constructor(
     fun getMatchSaveTime(): String {
         return pref.getMatchSaveTime()
     }
+
 }

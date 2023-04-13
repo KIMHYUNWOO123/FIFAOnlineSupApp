@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.insertMatch()
+        viewModel.insertData()
         setUpScreen()
         setContent {
             val navController = rememberNavController()

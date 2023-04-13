@@ -40,7 +40,7 @@ fun User(
     val isLoading by viewModel.isLoading.observeAsState()
     val focusManager = LocalFocusManager.current
     LaunchedEffect(Unit) {
-        viewModel.getBestRank("03704d4c66349949a799704a")
+//        viewModel.getBestRank("03704d4c66349949a799704a")
     }
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(
@@ -142,7 +142,10 @@ fun User(
                         Text("조회하기")
                     }
                     DropdownMenu(modifier = Modifier.wrapContentSize(), expanded = isExpanded, onDismissRequest = { isExpanded = false }) {
-                        DropdownMenuItem(onClick = { isExpanded = false }) {
+                        DropdownMenuItem(onClick = {
+                            isExpanded = false
+                            viewModel.getBestRank()
+                        }) {
                             Text(text = "역대 최고 등급 조회", fontSize = 10.sp)
                         }
                         DropdownMenuItem(onClick = {
