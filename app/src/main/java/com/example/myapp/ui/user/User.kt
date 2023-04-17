@@ -1,5 +1,6 @@
 package com.example.myapp.ui.user
 
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,7 +10,10 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -17,11 +21,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,7 +39,9 @@ import com.example.myapp.utils.LoadingBar
 
 @Composable
 fun User(
-    viewModel: UserViewModel = hiltViewModel()
+    viewModel: UserViewModel = hiltViewModel(),
+    onMatchView: (String) -> Unit,
+    onTransactionView: (String) -> Unit
 ) {
     val name by viewModel.userData.observeAsState()
     val level by viewModel.userLevel.observeAsState()
@@ -51,15 +59,38 @@ fun User(
     val onInitView: () -> Unit = {
         onBestRankView.value = false
     }
+    val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     LaunchedEffect(Unit) {
-//        viewModel.getBestRank("03704d4c66349949a799704a")
+//       viewModel.getBestRank("03704d4c66349949a799704a")
     }
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(15.dp), contentAlignment = Alignment.TopStart
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_back_24),
+                modifier = Modifier
+                    .size(30.dp)
+                    .clickable { backPressedDispatcher?.onBackPressed() },
+                contentDescription = "뒤로가기",
+                contentScale = ContentScale.Crop
+            )
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 15.dp), contentAlignment = Alignment.TopCenter
+        ) {
+            Text(text = "유저 정보", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(15.dp), horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.fillMaxHeight(0.15f))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
                 OutlinedTextField(
                     value = text,
@@ -130,88 +161,53 @@ fun User(
                         Text(text = level.toString(), fontSize = 25.sp)
                     }
                 }
-                var isExpanded by remember {
-                    mutableStateOf(false)
-                }
-                var isMatchMenuExpanded by remember {
-                    mutableStateOf(false)
-                }
-                var isTransactionMenuExpanded by remember {
-                    mutableStateOf(false)
-                }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.7f)
-                            .background(Color.Yellow)
-                            .clickable {
-                                onBestRankView.value = false
-                                isExpanded = !isExpanded
-                                onInitView.invoke()
-                            }, contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "조회하기", fontSize = 20.sp)
+                if (!bestRankList.isNullOrEmpty()) {
+                    Column(modifier = Modifier.wrapContentHeight()) {
+                        Box(
+                            modifier = Modifier
+                                .wrapContentHeight()
+                                .fillMaxWidth(), contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "최고기록", fontSize = 20.sp)
+                        }
+                        BestRankView { bestRankList!! }
                     }
-                    DropdownMenu(modifier = Modifier
-                        .wrapContentSize(), expanded = isExpanded, onDismissRequest = { isExpanded = false }) {
-                        DropdownMenuItem(onClick = {
-                            isExpanded = false
-                            viewModel.getBestRank()
-                            onBestRankView.value = true
-                        }) {
-                            Text(text = "역대 최고 등급 조회", fontSize = 13.sp)
-                        }
-                        DropdownMenuItem(onClick = {
-                            isExpanded = false
-                            isMatchMenuExpanded = true
-                        }) {
-                            Text(text = "유저의 매치 기록 조회", fontSize = 13.sp)
-                        }
-                        DropdownMenuItem(onClick = {
-                            isExpanded = false
-                            isTransactionMenuExpanded = true
-                        }) {
-                            Text(text = "유저 거래 기록 조회", fontSize = 13.sp)
-                        }
+                    val matchInteractionSource = remember {
+                        MutableInteractionSource()
                     }
-                    DropdownMenu(modifier = Modifier.wrapContentSize(), expanded = isMatchMenuExpanded, onDismissRequest = { isMatchMenuExpanded = false }) {
-                        DropdownMenuItem(onClick = { isMatchMenuExpanded = false }) {
-                            Text(text = "리그 친선", fontSize = 10.sp)
+                    val matchIsPress by matchInteractionSource.collectIsPressedAsState()
+                    Box(modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .clickable(interactionSource = matchInteractionSource, indication = null) {
+                            onMatchView(accessId.toString())
                         }
-                        DropdownMenuItem(onClick = { isMatchMenuExpanded = false }) {
-                            Text(text = "클래식 1on1", fontSize = 10.sp)
-                        }
-                        DropdownMenuItem(onClick = { isMatchMenuExpanded = false }) {
-                            Text(text = "공식경기", fontSize = 10.sp)
-                        }
-                        DropdownMenuItem(onClick = { isMatchMenuExpanded = false }) {
-                            Text(text = "감독모드", fontSize = 10.sp)
-                        }
-                        DropdownMenuItem(onClick = { isMatchMenuExpanded = false }) {
-                            Text(text = "공식 친선", fontSize = 10.sp)
-                        }
-                        DropdownMenuItem(onClick = { isMatchMenuExpanded = false }) {
-                            Text(text = "볼타 친선", fontSize = 10.sp)
-                        }
-                        DropdownMenuItem(onClick = { isMatchMenuExpanded = false }) {
-                            Text(text = "볼타 공식", fontSize = 10.sp)
-                        }
+                        .padding(top = 30.dp)
+                        .wrapContentHeight()
+                        .clip(RectangleShape)
+                        .border(width = 1.dp, color = colorResource(id = R.color.app_color))
+                        .background(if (matchIsPress) colorResource(id = R.color.app_color) else Color.White), contentAlignment = Alignment.Center) {
+                        Text(modifier = Modifier.padding(vertical = 15.dp), text = "경기 기록", fontSize = 30.sp, color = if (matchIsPress) Color.White else Color.Black)
                     }
-                    DropdownMenu(modifier = Modifier.wrapContentSize(), expanded = isTransactionMenuExpanded, onDismissRequest = { isTransactionMenuExpanded = false }) {
-                        DropdownMenuItem(onClick = { isTransactionMenuExpanded = false }) {
-                            Text(text = "구입 거래 조회", fontSize = 10.sp)
+                    val transactionInteractionSource = remember {
+                        MutableInteractionSource()
+                    }
+                    val transactionIsPress by transactionInteractionSource.collectIsPressedAsState()
+                    Box(modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .clickable(interactionSource = transactionInteractionSource, indication = null) {
+                            onTransactionView(accessId.toString())
                         }
-                        DropdownMenuItem(onClick = { isTransactionMenuExpanded = false }) {
-                            Text(text = "판매 거래 조회", fontSize = 10.sp)
-                        }
+                        .padding(top = 30.dp)
+                        .wrapContentHeight()
+                        .clip(RectangleShape)
+                        .border(width = 1.dp, color = colorResource(id = R.color.app_color))
+                        .background(if (transactionIsPress) colorResource(id = R.color.app_color) else Color.White), contentAlignment = Alignment.Center) {
+                        Text(modifier = Modifier.padding(vertical = 15.dp), text = "거래 내역", fontSize = 30.sp, color = if (transactionIsPress) Color.White else Color.Black)
                     }
                 }
             }
             if (error!!.isNotBlank()) {
                 EmptyView()
-            }
-            if (onBestRankView.value && !bestRankList.isNullOrEmpty()) {
-                BestRankView { bestRankList!! }
             }
         }
     }
@@ -224,9 +220,10 @@ fun User(
 fun BestRankView(list: () -> List<BestRankList>) {
     Box(
         modifier = Modifier
-            .fillMaxSize()
+            .wrapContentHeight()
+            .fillMaxWidth()
             .padding(5.dp)
-            .padding(top = 25.dp)
+            .padding(top = 10.dp), contentAlignment = Alignment.Center
     ) {
         LazyColumn {
             items(list()) { item ->

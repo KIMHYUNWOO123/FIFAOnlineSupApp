@@ -93,66 +93,66 @@ fun Main(
                         .padding(15.dp), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Image(modifier = Modifier.size(30.dp), painter = painterResource(id = R.drawable.ic_match), contentDescription = null)
-                    Spacer(modifier = Modifier.fillMaxWidth(0.05f))
-                    Text(text = "매치정보", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color.Black)
-                }
-            }
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.5f)
-                .padding(10.dp)
-        ) {
-            val interactionSource = remember { MutableInteractionSource() }
-            val isPressed by interactionSource.collectIsPressedAsState()
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .border(width = 1.dp, color = if (isPressed) Color.Red else colorResource(id = R.color.app_color))
-                    .clickable(interactionSource = interactionSource, indication = null) {
-
-                    }, contentAlignment = Alignment.Center
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(15.dp), verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Image(modifier = Modifier.size(30.dp), painter = painterResource(id = R.drawable.ic_ranker), contentDescription = null)
-                    Spacer(modifier = Modifier.fillMaxWidth(0.05f))
-                    Text(text = "랭커정보", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color.Black)
-                }
-            }
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(10.dp)
-        ) {
-            val interactionSource = remember { MutableInteractionSource() }
-            val isPressed by interactionSource.collectIsPressedAsState()
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .border(width = 1.dp, color = if (isPressed) Color.Red else colorResource(id = R.color.app_color))
-                    .clickable(interactionSource = interactionSource, indication = null) {
-
-                    }, contentAlignment = Alignment.Center
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(15.dp), verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
                     Image(modifier = Modifier.size(30.dp), painter = painterResource(id = R.drawable.ic_meta), contentDescription = null)
                     Spacer(modifier = Modifier.fillMaxWidth(0.05f))
-                    Text(text = "메타정보", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                    Text(text = "선수정보", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color.Black)
                 }
             }
         }
+//        Box(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .fillMaxHeight(0.5f)
+//                .padding(10.dp)
+//        ) {
+//            val interactionSource = remember { MutableInteractionSource() }
+//            val isPressed by interactionSource.collectIsPressedAsState()
+//            Box(
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .border(width = 1.dp, color = if (isPressed) Color.Red else colorResource(id = R.color.app_color))
+//                    .clickable(interactionSource = interactionSource, indication = null) {
+//
+//                    }, contentAlignment = Alignment.Center
+//            ) {
+//                Row(
+//                    modifier = Modifier
+//                        .fillMaxSize()
+//                        .padding(15.dp), verticalAlignment = Alignment.CenterVertically,
+//                    horizontalArrangement = Arrangement.Center
+//                ) {
+//                    Image(modifier = Modifier.size(30.dp), painter = painterResource(id = R.drawable.ic_ranker), contentDescription = null)
+//                    Spacer(modifier = Modifier.fillMaxWidth(0.05f))
+//                    Text(text = "랭커정보", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+//                }
+//            }
+//        }
+//        Box(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .padding(10.dp)
+//        ) {
+//            val interactionSource = remember { MutableInteractionSource() }
+//            val isPressed by interactionSource.collectIsPressedAsState()
+//            Box(
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .border(width = 1.dp, color = if (isPressed) Color.Red else colorResource(id = R.color.app_color))
+//                    .clickable(interactionSource = interactionSource, indication = null) {
+//
+//                    }, contentAlignment = Alignment.Center
+//            ) {
+//                Row(
+//                    modifier = Modifier
+//                        .fillMaxSize()
+//                        .padding(15.dp), verticalAlignment = Alignment.CenterVertically,
+//                    horizontalArrangement = Arrangement.Center
+//                ) {
+//                    Image(modifier = Modifier.size(30.dp), painter = painterResource(id = R.drawable.ic_meta), contentDescription = null)
+//                    Spacer(modifier = Modifier.fillMaxWidth(0.05f))
+//                    Text(text = "메타정보", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+//                }
+//            }
+//        }
     }
 }

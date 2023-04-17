@@ -44,6 +44,7 @@ class UserViewModel @Inject constructor(
             isLoading.postValue(false)
             error.value = if (t.message!!.contains("400")) "사용자 정보가 없습니다" else t.message
         }) {
+            _userAccessId.value = ""
             error.value = ""
             val result = useCase.getUserData(nickName)
             result.let {
@@ -51,20 +52,20 @@ class UserViewModel @Inject constructor(
                 _userData.postValue(it.nickname)
                 _userLevel.postValue(it.level.toString())
                 _userAccessId.postValue(it.accessId)
+                getBestRank(it.accessId)
             }
         }.invokeOnCompletion {
-            isLoading.postValue(false)
         }
     }
 
-    fun getBestRank() {
+    private fun getBestRank(accessId: String) {
         isLoading.postValue(true)
         viewModelScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, t ->
             Log.d("Exception", "getBestRank: $t")
             isLoading.postValue(false)
         }) {
             error.value = ""
-            val result = useCase.getBestRank(userAccessId.value.toString())
+            val result = useCase.getBestRank(accessId)
             val matchTypeDataList = async(Dispatchers.IO) {
                 metaDataUseCase.getMatch()
             }
