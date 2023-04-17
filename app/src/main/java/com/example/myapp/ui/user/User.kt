@@ -7,6 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -24,7 +26,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.domain.entity.BestRankList
 import com.example.myapp.R
+import com.example.myapp.utils.EmptyView
 import com.example.myapp.utils.LoadingBar
 
 @Composable
@@ -39,6 +43,14 @@ fun User(
     }
     val isLoading by viewModel.isLoading.observeAsState()
     val focusManager = LocalFocusManager.current
+    val error by viewModel.error.observeAsState()
+    val bestRankList by viewModel.bestRankList.observeAsState()
+    val onBestRankView = remember {
+        mutableStateOf(false)
+    }
+    val onInitView: () -> Unit = {
+        onBestRankView.value = false
+    }
     LaunchedEffect(Unit) {
 //        viewModel.getBestRank("03704d4c66349949a799704a")
     }
@@ -76,6 +88,7 @@ fun User(
                         .clickable(interactionSource = interactionSource, indication = null) {
                             viewModel.getUserData(text)
                             focusManager.clearFocus()
+                            onInitView.invoke()
                         }
                         .clip(RectangleShape)
                         .background(color = if (isClick) colorResource(id = R.color.light_red) else colorResource(id = R.color.lawn_green))
@@ -91,14 +104,12 @@ fun User(
                         .padding(10.dp)
                 ) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.4f), contentAlignment = Alignment.Center
+                        modifier = Modifier.fillMaxWidth(0.4f), contentAlignment = Alignment.Center
                     ) {
                         Image(modifier = Modifier.size(30.dp), painter = painterResource(id = R.drawable.ic_nickname), contentDescription = "")
                     }
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth(1f), contentAlignment = Alignment.Center
+                        modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center
                     ) {
                         Text(text = name.toString(), fontSize = 25.sp, fontStyle = FontStyle.Italic)
                     }
@@ -109,14 +120,12 @@ fun User(
                         .padding(10.dp)
                 ) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.4f), contentAlignment = Alignment.Center
+                        modifier = Modifier.fillMaxWidth(0.4f), contentAlignment = Alignment.Center
                     ) {
                         Text(text = "LV", fontSize = 25.sp, color = Color.Blue)
                     }
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth(1f), contentAlignment = Alignment.Center
+                        modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center
                     ) {
                         Text(text = level.toString(), fontSize = 25.sp)
                     }
@@ -133,32 +142,36 @@ fun User(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(0.5f)
+                            .fillMaxWidth(0.7f)
                             .background(Color.Yellow)
                             .clickable {
+                                onBestRankView.value = false
                                 isExpanded = !isExpanded
+                                onInitView.invoke()
                             }, contentAlignment = Alignment.Center
                     ) {
-                        Text("조회하기")
+                        Text(text = "조회하기", fontSize = 20.sp)
                     }
-                    DropdownMenu(modifier = Modifier.wrapContentSize(), expanded = isExpanded, onDismissRequest = { isExpanded = false }) {
+                    DropdownMenu(modifier = Modifier
+                        .wrapContentSize(), expanded = isExpanded, onDismissRequest = { isExpanded = false }) {
                         DropdownMenuItem(onClick = {
                             isExpanded = false
                             viewModel.getBestRank()
+                            onBestRankView.value = true
                         }) {
-                            Text(text = "역대 최고 등급 조회", fontSize = 10.sp)
+                            Text(text = "역대 최고 등급 조회", fontSize = 13.sp)
                         }
                         DropdownMenuItem(onClick = {
                             isExpanded = false
                             isMatchMenuExpanded = true
                         }) {
-                            Text(text = "유저의 매치 기록 조회", fontSize = 10.sp)
+                            Text(text = "유저의 매치 기록 조회", fontSize = 13.sp)
                         }
                         DropdownMenuItem(onClick = {
                             isExpanded = false
                             isTransactionMenuExpanded = true
                         }) {
-                            Text(text = "유저 거래 기록 조회", fontSize = 10.sp)
+                            Text(text = "유저 거래 기록 조회", fontSize = 13.sp)
                         }
                     }
                     DropdownMenu(modifier = Modifier.wrapContentSize(), expanded = isMatchMenuExpanded, onDismissRequest = { isMatchMenuExpanded = false }) {
@@ -194,9 +207,52 @@ fun User(
                     }
                 }
             }
+            if (error!!.isNotBlank()) {
+                EmptyView()
+            }
+            if (onBestRankView.value && !bestRankList.isNullOrEmpty()) {
+                BestRankView { bestRankList!! }
+            }
         }
     }
     if (isLoading!!) {
         LoadingBar()
     }
 }
+
+@Composable
+fun BestRankView(list: () -> List<BestRankList>) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(5.dp)
+            .padding(top = 25.dp)
+    ) {
+        LazyColumn {
+            items(list()) { item ->
+                BestRankListCard(item = item)
+                Spacer(modifier = Modifier.fillMaxHeight(0.1f))
+                Divider(
+                    color = Color.LightGray, modifier = Modifier
+                        .fillMaxHeight(0.05f)
+                        .fillMaxWidth()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun BestRankListCard(item: BestRankList) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(5.dp), horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = item.matchType, fontSize = 15.sp)
+        Text(text = item.division, fontSize = 15.sp)
+        Text(text = item.date, fontSize = 15.sp)
+    }
+}
+

@@ -1,6 +1,5 @@
 package com.example.domain.usecase
 
-import android.util.Log
 import com.example.domain.DaoRepository
 import com.example.domain.Repository
 import com.example.domain.SharedPreferencesService
