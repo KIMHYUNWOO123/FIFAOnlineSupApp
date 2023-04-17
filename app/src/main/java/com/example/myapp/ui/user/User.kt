@@ -39,9 +39,7 @@ import com.example.myapp.utils.LoadingBar
 
 @Composable
 fun User(
-    viewModel: UserViewModel = hiltViewModel(),
-    onMatchView: (String) -> Unit,
-    onTransactionView: (String) -> Unit
+    viewModel: UserViewModel = hiltViewModel(), onMatchView: (String) -> Unit, onTransactionView: (String) -> Unit
 ) {
     val name by viewModel.userData.observeAsState()
     val level by viewModel.userLevel.observeAsState()
@@ -70,27 +68,25 @@ fun User(
                 .padding(15.dp), contentAlignment = Alignment.TopStart
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_back_24),
-                modifier = Modifier
+                painter = painterResource(id = R.drawable.ic_back_24), modifier = Modifier
                     .size(30.dp)
-                    .clickable { backPressedDispatcher?.onBackPressed() },
-                contentDescription = "뒤로가기",
-                contentScale = ContentScale.Crop
+                    .clickable(
+                        interactionSource = MutableInteractionSource(), indication = null
+                    ) { backPressedDispatcher?.onBackPressed() }, contentDescription = "뒤로가기", contentScale = ContentScale.Crop
             )
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 15.dp), contentAlignment = Alignment.TopCenter
-        ) {
-            Text(text = "유저 정보", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(15.dp), horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.fillMaxHeight(0.15f))
+            Box(
+                modifier = Modifier
+                    .wrapContentSize(), contentAlignment = Alignment.TopCenter
+            ) {
+                Text(text = "유저 정보", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            }
+            Spacer(modifier = Modifier.fillMaxHeight(0.1f))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
                 OutlinedTextField(
                     value = text,
