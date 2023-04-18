@@ -1,10 +1,7 @@
 package com.example.data
 
 import com.example.domain.Repository
-import com.example.domain.entity.BestRankEntity
-import com.example.domain.entity.DivisionEntity
-import com.example.domain.entity.MatchTypeEntity
-import com.example.domain.entity.UserEntity
+import com.example.domain.entity.*
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -27,4 +24,13 @@ class RepositoryImpl @Inject constructor(
     override suspend fun getDivisionData(): List<DivisionEntity> {
         return metaApiService.getDivisionJson()
     }
+
+    override suspend fun getMatchRecord(accessId: String, matchType: Int): List<String> {
+        return apiService.getMatchRecord(accessId = accessId, matchType = matchType)
+    }
+
+    override suspend fun getDetailMatchRecord(matchId: String): DetailMatchRecordEntity {
+        return apiService.getDetailMatchRecord(matchId)
+    }
+
 }

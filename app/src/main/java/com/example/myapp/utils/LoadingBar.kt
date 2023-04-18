@@ -15,9 +15,9 @@ fun LoadingBar() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         CircularProgressIndicator(
             modifier = Modifier
-                .fillMaxSize(0.1f),
+                .fillMaxSize(0.2f),
             color = colorResource(id = R.color.app_color),
-            strokeWidth = 2.dp
+            strokeWidth = 4.dp
         )
     }
 }

@@ -73,9 +73,9 @@ class UserViewModel @Inject constructor(
             val divisionDataList = async(Dispatchers.IO) {
                 metaDataUseCase.getDivision()
             }
-            _bestRankList.postValue(mapper.bestRankMap(result, matchTypeDataList.await(), divisionDataList.await()))
+            val mapResult = mapper.bestRankMap(result, matchTypeDataList.await(), divisionDataList.await())
+            mapResult.let { _bestRankList.postValue(it) }
         }.invokeOnCompletion {
-            Log.d("UserViewModel", "getBestRank: ${bestRankList.value}")
             isLoading.postValue(false)
         }
     }

@@ -1,9 +1,6 @@
 package com.example.domain
 
-import com.example.domain.entity.BestRankEntity
-import com.example.domain.entity.DivisionEntity
-import com.example.domain.entity.MatchTypeEntity
-import com.example.domain.entity.UserEntity
+import com.example.domain.entity.*
 
 interface Repository {
     suspend fun getUserData(nickname: String): UserEntity
@@ -11,4 +8,8 @@ interface Repository {
 
     suspend fun getMatchData(): List<MatchTypeEntity>
     suspend fun getDivisionData(): List<DivisionEntity>
+
+    suspend fun getMatchRecord(accessId: String, matchType: Int): List<String>
+
+    suspend fun getDetailMatchRecord(matchId: String): DetailMatchRecordEntity
 }
