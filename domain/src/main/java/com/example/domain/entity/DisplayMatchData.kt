@@ -1,6 +1,7 @@
 package com.example.domain.entity
 
 data class DisplayMatchData(
+    val isFirst : Boolean,
     val matchId: String,
     val nickname1: String,
     val nickname2: String,

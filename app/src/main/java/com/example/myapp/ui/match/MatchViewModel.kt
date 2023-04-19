@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.domain.entity.DetailMapData
 import com.example.domain.entity.DetailMatchRecordEntity
 import com.example.domain.entity.DisplayMatchData
 import com.example.domain.entity.MatchTypeData
@@ -30,8 +31,8 @@ class MatchViewModel @Inject constructor(
     private val _matchRecordList = MutableLiveData<List<String>>()
     val matchRecordList: LiveData<List<String>> = _matchRecordList
 
-    private val _detailMatchRecordList = MutableLiveData<DetailMatchRecordEntity>()
-    val detailMatchRecordList: LiveData<DetailMatchRecordEntity> = _detailMatchRecordList
+    private val _detailMapData = MutableLiveData<List<DetailMapData>>()
+    val detailMapData: LiveData<List<DetailMapData>> = _detailMapData
 
     private val _displayMatchData = MutableLiveData<List<DisplayMatchData>>()
     val displayMatchData: LiveData<List<DisplayMatchData>> = _displayMatchData
@@ -89,7 +90,8 @@ class MatchViewModel @Inject constructor(
         }
     }
 
-    fun getDetailData(matchId: String) {
+    fun getDetailData(isFirst: Boolean, matchId: String) {
+        Log.d("###", "getDetailData: $isFirst, $matchId")
         viewModelScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, t ->
             isLoading.postValue(false)
             Log.d("MatchViewModel", "Exception: $t")
@@ -97,7 +99,11 @@ class MatchViewModel @Inject constructor(
         }) {
             val result = matchUseCase.getDetailMatchRecord(matchId)
             result.let {
-                _detailMatchRecordList.postValue(it)
+                val mapResult = mapper.detailDataMap(isFirst, it)
+                mapResult.let { mapData ->
+                    Log.d("###", "getDetailData: $mapData")
+                    _detailMapData.postValue(mapData)
+                }
             }
         }.invokeOnCompletion {
             isLoading.postValue(false)

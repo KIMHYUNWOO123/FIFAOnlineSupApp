@@ -1,6 +1,5 @@
 package com.example.myapp.ui.match
 
-import android.util.Log
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
@@ -30,7 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.domain.entity.DetailMatchRecordEntity
+import com.example.domain.entity.DetailMapData
 import com.example.domain.entity.DisplayMatchData
 import com.example.domain.entity.MatchTypeData
 import com.example.myapp.R
@@ -145,8 +144,7 @@ fun MatchListCard(accessId: String, item: MatchTypeData, index: Int, selected: B
 
 @Composable
 fun DisplayCard(data: DisplayMatchData, index: Int, isExpanded: Boolean, viewModel: MatchViewModel = hiltViewModel(), onClick: () -> Unit) {
-    val detailData = viewModel.detailMatchRecordList.observeAsState(null)
-    Log.d("###", "$index: $isExpanded")
+    val detailData = viewModel.detailMapData.observeAsState(null)
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -247,8 +245,10 @@ fun DisplayCard(data: DisplayMatchData, index: Int, isExpanded: Boolean, viewMod
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable(interactionSource = MutableInteractionSource(), indication = null) {
+                            if (!isExpanded) {
+                                viewModel.getDetailData(data.isFirst, data.matchId)
+                            }
                             onClick.invoke()
-                            viewModel.getDetailData(data.matchId)
                         }, contentAlignment = Alignment.Center
                 ) {
                     Image(
@@ -271,7 +271,7 @@ fun EmptyView() {
 
 @Composable
 fun DetailView(
-    data: DetailMatchRecordEntity
+    data: List<DetailMapData>
 ) {
     Box(modifier = Modifier.fillMaxSize(0.95f), contentAlignment = Alignment.Center) {
         Column(modifier = Modifier.fillMaxSize()) {

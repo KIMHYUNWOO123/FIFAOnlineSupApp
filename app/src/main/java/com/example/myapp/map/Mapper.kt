@@ -1,6 +1,8 @@
 package com.example.myapp.map
 
 import com.example.domain.entity.*
+import java.util.*
+import kotlin.math.roundToInt
 
 class Mapper {
     fun bestRankMap(data: List<BestRankEntity>, matchTypeDataList: List<MatchTypeData>, divisionDataList: List<DivisionData>): List<BestRankList> {
@@ -39,6 +41,7 @@ class Mapper {
 
             displayList.add(
                 i, DisplayMatchData(
+                    isFirst = isFirst,
                     matchId = matchId,
                     nickname1 = nickname1,
                     nickname2 = nickname2,
@@ -50,5 +53,75 @@ class Mapper {
             )
         }
         return displayList.toList()
+    }
+
+    fun detailDataMap(isFirst: Boolean, list: DetailMatchRecordEntity): List<DetailMapData> {
+        val returnList = mutableListOf<DetailMapData>()
+        for (i in 0..1) {
+            list.matchInfo[i].let {
+                val result = when (it.matchDetail.matchEndType) { // 0: 정상종료, 1: 몰수승 ,2:몰수패
+                    0 -> it.matchDetail.matchResult
+                    1 -> "몰수승"
+                    2 -> "몰수패"
+                    else -> it.matchDetail.matchResult
+                }
+                if (it.player.isNotEmpty() && it.shootDetail.isNotEmpty()) {
+                    val foul = it.matchDetail.foul
+                    val injury = it.matchDetail.injury
+                    val yellowCards = it.matchDetail.yellowCards
+                    val redCards = it.matchDetail.redCards
+                    val possession = it.matchDetail.possession
+                    val offsideCount = it.matchDetail.offsideCount
+                    val averageRating = it.matchDetail.averageRating
+                    val totalShoot = it.shoot.shootTotal
+                    val validShoot = it.shoot.effectiveShootTotal
+                    val goal = it.shoot.goalTotal
+                    val validPass = if (it.pass.passSuccess != 0) {
+                        ((it.pass.passSuccess.toFloat() / it.pass.passTry.toFloat()) * 100.0f).roundToInt()
+                    } else 0
+                    val validDefence = if (it.defence.blockSuccess != 0) ((it.defence.blockSuccess.toFloat() / it.defence.blockTry.toFloat()) * 100.0f).roundToInt() else 0
+                    val validTackle = if (it.defence.tackleSuccess != 0) ((it.defence.tackleSuccess.toFloat() / it.defence.tackleTry.toFloat()) * 100.0f).roundToInt() else 0.0f
+                    var max = 0.0f
+                    var maxIndex = 0
+                    for ((i, item) in it.player.withIndex()) {
+                        val rating = item.status.spRating
+                        if (rating > max) {
+                            max = rating
+                            maxIndex = i
+                        }
+                    }
+                    val mvpPlayerSpId = it.player[maxIndex].spId
+                    returnList.add(
+                        i, DetailMapData(
+                            result = result,
+                            foul = foul.toString(),
+                            injury = injury.toString(),
+                            yellowCards = yellowCards.toString(),
+                            redCards = redCards.toString(),
+                            possession = possession.toString(),
+                            offsideCount = offsideCount.toString(),
+                            averageRating = averageRating.toString(),
+                            totalShoot = totalShoot.toString(),
+                            validShoot = validShoot.toString(),
+                            goal = goal.toString(),
+                            validPass = validPass.toString(),
+                            validDefence = validDefence.toString(),
+                            validTackle = validTackle.toString(),
+                            mvpPlayerSpId = mvpPlayerSpId.toString()
+                        )
+                    )
+                } else {
+                    returnList.add(
+                        i, DetailMapData(
+                            result = result
+                        )
+                    )
+                }
+            }
+        }
+        if (!isFirst) {
+            Collections.swap(returnList, 0, 1)
+        }
+        return returnList.toList()
     }
 }
