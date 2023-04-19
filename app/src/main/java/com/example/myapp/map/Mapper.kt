@@ -35,7 +35,6 @@ class Mapper {
             val goal1 = if (isFirst) it.matchInfo[0].shoot.goalTotalDisplay else it.matchInfo[1].shoot.goalTotalDisplay
             val goal2 = if (isFirst) it.matchInfo[1].shoot.goalTotalDisplay else it.matchInfo[0].shoot.goalTotalDisplay
             val result = if (isFirst) it.matchInfo[0].matchDetail.matchResult else it.matchInfo[1].matchDetail.matchResult
-            val isWin = result == "승"
             val date = it.matchDate
 
             displayList.add(
@@ -45,7 +44,7 @@ class Mapper {
                     nickname2 = nickname2,
                     goal1 = goal1.toString(),
                     goal2 = goal2.toString(),
-                    isWin = isWin,
+                    result = result,
                     date = date
                 )
             )

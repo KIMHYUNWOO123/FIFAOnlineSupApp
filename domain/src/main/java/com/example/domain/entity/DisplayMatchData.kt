@@ -6,6 +6,6 @@ data class DisplayMatchData(
     val nickname2: String,
     val goal1: String,
     val goal2: String,
-    val isWin: Boolean,
+    val result : String,
     val date: String,
 )

@@ -37,7 +37,8 @@ class UserViewModel @Inject constructor(
     private val _bestRankList: MutableLiveData<List<BestRankList>> = MutableLiveData()
     val bestRankList: MutableLiveData<List<BestRankList>> = _bestRankList
 
-    fun getUserData(nickName: String) {
+    fun getUserData(nickname: String) {
+        val nickName = nickname.replace(" ", "")
         isLoading.postValue(true)
         viewModelScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, t ->
             Log.d("UserViewModel", "Exception: $t")

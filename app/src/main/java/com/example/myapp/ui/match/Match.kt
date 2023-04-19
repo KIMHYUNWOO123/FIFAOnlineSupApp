@@ -2,7 +2,7 @@ package com.example.myapp.ui.match
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandIn
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -12,7 +12,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -82,14 +81,19 @@ fun Match(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.95f)
-                        .fillMaxHeight(0.95f), contentAlignment = Alignment.Center
+                        .fillMaxHeight(0.95f), contentAlignment = Alignment.CenterStart
                 ) {
-                    var expanded by remember {
-                        mutableStateOf(false)
-                    }
+                    val expandedItems = remember { mutableStateListOf<Int>() }
                     LazyColumn {
-                        items(displayList.value!!) {
-                            DisplayCard(it, expanded) { expanded = !expanded }
+                        itemsIndexed(displayList.value!!) { index, item ->
+                            val isExpanded = expandedItems.contains(index)
+                            DisplayCard(item, isExpanded = isExpanded) {
+                                if (!isExpanded) {
+                                    expandedItems.add(index)
+                                } else {
+                                    expandedItems.remove(index)
+                                }
+                            }
                             Spacer(modifier = Modifier.fillParentMaxHeight(0.03f))
                         }
                     }
@@ -146,18 +150,25 @@ fun MatchListCard(accessId: String, item: MatchTypeData, index: Int, selected: B
 }
 
 @Composable
-fun DisplayCard(data: DisplayMatchData, expanded: Boolean, viewModel: MatchViewModel = hiltViewModel(), onClick: () -> Unit) {
+fun DisplayCard(data: DisplayMatchData, isExpanded: Boolean, viewModel: MatchViewModel = hiltViewModel(), onClick: () -> Unit) {
     val detailData = viewModel.detailMatchRecordList.observeAsState(null)
     Box(
         modifier = Modifier
             .fillMaxSize()
             .clip(RoundedCornerShape(10.dp))
-            .background(color = if (data.isWin) colorResource(id = R.color.win).copy(alpha = 0.5f) else colorResource(id = R.color.defeat).copy(alpha = 0.5f))
+            .background(
+                color = when (data.result) {
+                    "승" -> colorResource(id = R.color.win).copy(alpha = 0.5f)
+                    "패" -> colorResource(id = R.color.defeat).copy(alpha = 0.5f)
+                    else -> Color.DarkGray.copy(
+                        alpha = 0.5f
+                    )
+                }
+            )
             .border(1.dp, color = Color.White)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
+            modifier = Modifier.fillMaxSize()
         ) {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(text = data.date.replace("T", "  "), fontSize = 15.sp)
@@ -195,8 +206,7 @@ fun DisplayCard(data: DisplayMatchData, expanded: Boolean, viewModel: MatchViewM
                 modifier = Modifier
                     .fillMaxSize()
                     .fillMaxHeight(0.6f)
-                    .padding(5.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(5.dp), verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
@@ -226,13 +236,14 @@ fun DisplayCard(data: DisplayMatchData, expanded: Boolean, viewModel: MatchViewM
                     .wrapContentHeight()
                     .fillMaxWidth()
             ) {
-                this@Column.AnimatedVisibility(visible = expanded && detailData.value != null, enter = expandIn(), exit = shrinkOut()) {
+                this@Column.AnimatedVisibility(
+                    visible = isExpanded && detailData.value != null, enter = fadeIn(), exit = shrinkOut()
+                ) {
                     DetailView(detailData.value!!)
                 }
             }
             Row(
-                modifier = Modifier
-                    .fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
@@ -245,7 +256,7 @@ fun DisplayCard(data: DisplayMatchData, expanded: Boolean, viewModel: MatchViewM
                     Image(
                         modifier = Modifier
                             .size(30.dp)
-                            .alpha(0.5f), painter = painterResource(id = if (expanded) R.drawable.ic_contract else R.drawable.ic_expand), contentDescription = ""
+                            .alpha(0.5f), painter = painterResource(id = if (isExpanded) R.drawable.ic_contract else R.drawable.ic_expand), contentDescription = ""
                     )
                 }
             }
@@ -261,7 +272,9 @@ fun EmptyView() {
 }
 
 @Composable
-fun DetailView(data: DetailMatchRecordEntity) {
+fun DetailView(
+    data: DetailMatchRecordEntity
+) {
     Box(modifier = Modifier.fillMaxSize(0.95f), contentAlignment = Alignment.Center) {
         Column(modifier = Modifier.fillMaxSize()) {
             Text("text")
