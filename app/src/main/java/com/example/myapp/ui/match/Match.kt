@@ -1,9 +1,8 @@
 package com.example.myapp.ui.match
 
+import android.util.Log
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.shrinkOut
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -83,16 +82,11 @@ fun Match(
                         .fillMaxWidth(0.95f)
                         .fillMaxHeight(0.95f), contentAlignment = Alignment.CenterStart
                 ) {
-                    val expandedItems = remember { mutableStateListOf<Int>() }
+                    val clicked = remember { mutableStateListOf<Boolean>(*Array(displayList.value!!.size) { false }) }
                     LazyColumn {
                         itemsIndexed(displayList.value!!) { index, item ->
-                            val isExpanded = expandedItems.contains(index)
-                            DisplayCard(item, isExpanded = isExpanded) {
-                                if (!isExpanded) {
-                                    expandedItems.add(index)
-                                } else {
-                                    expandedItems.remove(index)
-                                }
+                            DisplayCard(item, index, isExpanded = clicked[index]) {
+                                clicked[index] = !clicked[index]
                             }
                             Spacer(modifier = Modifier.fillParentMaxHeight(0.03f))
                         }
@@ -150,8 +144,9 @@ fun MatchListCard(accessId: String, item: MatchTypeData, index: Int, selected: B
 }
 
 @Composable
-fun DisplayCard(data: DisplayMatchData, isExpanded: Boolean, viewModel: MatchViewModel = hiltViewModel(), onClick: () -> Unit) {
+fun DisplayCard(data: DisplayMatchData, index: Int, isExpanded: Boolean, viewModel: MatchViewModel = hiltViewModel(), onClick: () -> Unit) {
     val detailData = viewModel.detailMatchRecordList.observeAsState(null)
+    Log.d("###", "$index: $isExpanded")
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -235,12 +230,15 @@ fun DisplayCard(data: DisplayMatchData, isExpanded: Boolean, viewModel: MatchVie
                 modifier = Modifier
                     .wrapContentHeight()
                     .fillMaxWidth()
+                    .animateContentSize()
             ) {
-                this@Column.AnimatedVisibility(
-                    visible = isExpanded && detailData.value != null, enter = fadeIn(), exit = shrinkOut()
-                ) {
+//                this@Column.AnimatedVisibility(
+//                    visible = isExpanded && detailData.value != null, enter = if (isClick) expandIn() else fadeIn(), exit = shrinkOut()
+//                ) {
+                if (isExpanded && detailData.value != null) {
                     DetailView(detailData.value!!)
                 }
+//                }
             }
             Row(
                 modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
@@ -277,25 +275,6 @@ fun DetailView(
 ) {
     Box(modifier = Modifier.fillMaxSize(0.95f), contentAlignment = Alignment.Center) {
         Column(modifier = Modifier.fillMaxSize()) {
-            Text("text")
-            Text("text")
-            Text("text")
-            Text("text")
-            Text("text")
-            Text("text")
-            Text("text")
-            Text("text")
-            Text("text")
-            Text("text")
-            Text("text")
-            Text("text")
-            Text("text")
-            Text("text")
-            Text("text")
-            Text("text")
-            Text("text")
-            Text("text")
-            Text("text")
             Text("text")
             Text("text")
             Text("text")

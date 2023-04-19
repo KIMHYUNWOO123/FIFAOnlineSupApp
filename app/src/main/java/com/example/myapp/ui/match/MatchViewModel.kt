@@ -83,7 +83,6 @@ class MatchViewModel @Inject constructor(
             val result = mapper.displayMatchDataMap(accessId, detailMatchList)
             result.let {
                 _displayMatchData.postValue(it)
-                Log.d("###", "getDetailMatchRecord: $it")
             }
         }.invokeOnCompletion {
             isLoading.postValue(false)
