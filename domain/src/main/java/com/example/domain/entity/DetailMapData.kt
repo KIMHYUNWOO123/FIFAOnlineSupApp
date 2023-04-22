@@ -14,6 +14,7 @@ data class DetailMapData(
     val averageRating: String = "0",
     val totalShoot: String = "0",
     val validShoot: String = "0",
+    val shootRating: String = "0",
     val goal: String = "0",
     val validPass: String = "0",
     val validDefence: String = "0",

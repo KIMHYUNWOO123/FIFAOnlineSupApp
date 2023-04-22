@@ -13,9 +13,7 @@ import com.example.domain.usecase.MatchUseCase
 import com.example.domain.usecase.MetaDataUseCase
 import com.example.myapp.map.Mapper
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,27 +36,31 @@ class MatchViewModel @Inject constructor(
     val displayMatchData: LiveData<List<DisplayMatchData>> = _displayMatchData
 
     val isLoading: MutableLiveData<Boolean> = MutableLiveData(false)
+    val isMatchRecordLoading: MutableLiveData<Boolean> = MutableLiveData(false)
     val error: MutableLiveData<String> = MutableLiveData("")
-
+    private var myJob: Job? = null
+    private var myDetailJob: Job? = null
     fun getMatchTypeList() {
         isLoading.postValue(true)
-        viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, t ->
+        myJob?.cancel()
+        myJob = viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, t ->
             isLoading.postValue(false)
             Log.d("MatchViewModel", "Exception: $t")
             error.postValue(t.message.toString())
         }) {
             val result = metaDataUseCase.getMatch()
             result.let { _matchTypeList.postValue(it) }
-        }.invokeOnCompletion {
+        }
+        myJob?.invokeOnCompletion {
             isLoading.postValue(false)
         }
     }
 
     fun getMatchRecord(accessId: String, matchType: Int) {
-        isLoading.postValue(true)
-        viewModelScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, t ->
-            isLoading.postValue(false)
-            Log.d("MatchViewModel", "Exception: $t")
+        isMatchRecordLoading.postValue(true)
+        myJob?.cancel()
+        myJob = viewModelScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, t ->
+            isMatchRecordLoading.postValue(false)
             error.postValue(t.message.toString())
         }) {
             val result = matchUseCase.getMatchRecord(accessId, matchType)
@@ -66,13 +68,14 @@ class MatchViewModel @Inject constructor(
                 _matchRecordList.postValue(it)
                 getDetailMatchRecord(accessId, result)
             }
-        }.invokeOnCompletion {
         }
     }
 
     private fun getDetailMatchRecord(accessId: String, list: List<String>) {
-        viewModelScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, t ->
-            isLoading.postValue(false)
+        myDetailJob?.cancel()
+        isMatchRecordLoading.postValue(true)
+        myDetailJob = viewModelScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, t ->
+            isMatchRecordLoading.postValue(false)
             Log.d("MatchViewModel", "Exception: $t")
             error.postValue(t.message.toString())
         }) {
@@ -85,28 +88,42 @@ class MatchViewModel @Inject constructor(
             result.let {
                 _displayMatchData.postValue(it)
             }
-        }.invokeOnCompletion {
-            isLoading.postValue(false)
+        }
+        myDetailJob?.invokeOnCompletion { t ->
+            if (t == null) {
+                isMatchRecordLoading.postValue(false)
+            }
+
         }
     }
 
     fun getDetailData(isFirst: Boolean, matchId: String) {
-        Log.d("###", "getDetailData: $isFirst, $matchId")
-        viewModelScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, t ->
+        isLoading.postValue(true)
+        myJob?.cancel()
+        myJob = viewModelScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, t ->
             isLoading.postValue(false)
             Log.d("MatchViewModel", "Exception: $t")
             error.postValue(t.message.toString())
         }) {
-            val result = matchUseCase.getDetailMatchRecord(matchId)
-            result.let {
-                val mapResult = mapper.detailDataMap(isFirst, it)
-                mapResult.let { mapData ->
-                    Log.d("###", "getDetailData: $mapData")
-                    _detailMapData.postValue(mapData)
+            runBlocking {
+                val result = async {
+                    val data = matchUseCase.getDetailMatchRecord(matchId)
+                    mapper.detailDataMap(isFirst, data)
                 }
+                _detailMapData.postValue(result.await())
+
             }
-        }.invokeOnCompletion {
+        }
+        myJob?.invokeOnCompletion {
             isLoading.postValue(false)
         }
+
+
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        myJob?.cancel()
+        myDetailJob?.cancel()
     }
 }

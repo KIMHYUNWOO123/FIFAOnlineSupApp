@@ -73,14 +73,16 @@ class Mapper {
                     val possession = it.matchDetail.possession
                     val offsideCount = it.matchDetail.offsideCount
                     val averageRating = it.matchDetail.averageRating
+                    val average = String.format("%.2f", averageRating).toDouble()
                     val totalShoot = it.shoot.shootTotal
                     val validShoot = it.shoot.effectiveShootTotal
+                    val shootRating = if (it.defence.blockSuccess != 0) ((it.shoot.effectiveShootTotal.toFloat() / it.shoot.shootTotal.toFloat()) * 100.0f).roundToInt() else 0
                     val goal = it.shoot.goalTotal
                     val validPass = if (it.pass.passSuccess != 0) {
                         ((it.pass.passSuccess.toFloat() / it.pass.passTry.toFloat()) * 100.0f).roundToInt()
                     } else 0
                     val validDefence = if (it.defence.blockSuccess != 0) ((it.defence.blockSuccess.toFloat() / it.defence.blockTry.toFloat()) * 100.0f).roundToInt() else 0
-                    val validTackle = if (it.defence.tackleSuccess != 0) ((it.defence.tackleSuccess.toFloat() / it.defence.tackleTry.toFloat()) * 100.0f).roundToInt() else 0.0f
+                    val validTackle = if (it.defence.tackleSuccess != 0) ((it.defence.tackleSuccess.toFloat() / it.defence.tackleTry.toFloat()) * 100.0f).roundToInt() else 0
                     var max = 0.0f
                     var maxIndex = 0
                     for ((i, item) in it.player.withIndex()) {
@@ -100,10 +102,11 @@ class Mapper {
                             redCards = redCards.toString(),
                             possession = possession.toString(),
                             offsideCount = offsideCount.toString(),
-                            averageRating = averageRating.toString(),
+                            averageRating = average.toString(),
                             totalShoot = totalShoot.toString(),
                             validShoot = validShoot.toString(),
                             goal = goal.toString(),
+                            shootRating = shootRating.toString(),
                             validPass = validPass.toString(),
                             validDefence = validDefence.toString(),
                             validTackle = validTackle.toString(),
