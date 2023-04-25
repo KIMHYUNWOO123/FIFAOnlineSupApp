@@ -76,7 +76,7 @@ class Mapper {
                     val average = String.format("%.2f", averageRating).toDouble()
                     val totalShoot = it.shoot.shootTotal
                     val validShoot = it.shoot.effectiveShootTotal
-                    val shootRating = if (it.defence.blockSuccess != 0) ((it.shoot.effectiveShootTotal.toFloat() / it.shoot.shootTotal.toFloat()) * 100.0f).roundToInt() else 0
+                    val shootRating = if (it.shoot.goalTotal != 0) ((it.shoot.goalTotal.toFloat() / it.shoot.shootTotal.toFloat()) * 100.0f).roundToInt() else 0
                     val goal = it.shoot.goalTotal
                     val validPass = if (it.pass.passSuccess != 0) {
                         ((it.pass.passSuccess.toFloat() / it.pass.passTry.toFloat()) * 100.0f).roundToInt()

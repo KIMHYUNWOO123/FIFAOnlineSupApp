@@ -12,4 +12,6 @@ interface Repository {
     suspend fun getMatchRecord(accessId: String, matchType: Int): List<String>
 
     suspend fun getDetailMatchRecord(matchId: String): DetailMatchRecordEntity
+
+    suspend fun getTransactionRecord(accessId: String, tradeType: String): List<TransactionRecordEntity>
 }

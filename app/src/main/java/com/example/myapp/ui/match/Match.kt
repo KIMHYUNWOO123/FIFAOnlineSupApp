@@ -1,6 +1,5 @@
 package com.example.myapp.ui.match
 
-import android.util.Log
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
@@ -80,7 +79,7 @@ fun Match(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.95f)
-                        .fillMaxHeight(1f), contentAlignment = Alignment.CenterStart
+                        .fillMaxHeight(1f), contentAlignment = Alignment.TopCenter
                 ) {
                     val clicked = remember { mutableStateListOf<Boolean>(*Array(displayList.value!!.size) { false }) }
                     LazyColumn {
@@ -93,7 +92,6 @@ fun Match(
                     }
                 }
             }
-//            Log.d("###", "Match: ${isMatchRecordLoading.value} ${isLoading.value}")
             if (displayList.value.isNullOrEmpty() && isMatchRecordLoading.value == false) {
                 EmptyView()
             }

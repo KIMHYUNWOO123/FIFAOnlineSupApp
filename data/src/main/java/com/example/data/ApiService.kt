@@ -2,6 +2,7 @@ package com.example.data
 
 import com.example.domain.entity.BestRankEntity
 import com.example.domain.entity.DetailMatchRecordEntity
+import com.example.domain.entity.TransactionRecordEntity
 import com.example.domain.entity.UserEntity
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -29,4 +30,10 @@ interface ApiService {
     suspend fun getDetailMatchRecord(
         @Path("matchid", encoded = true) matchId: String
     ): DetailMatchRecordEntity
+
+    @GET("users/{accessid}/markets")
+    suspend fun getTransactionRecord(
+        @Path("accessid", encoded = true) accessId: String,
+        @Query("tradetype") tradeType: String
+    ): List<TransactionRecordEntity>
 }

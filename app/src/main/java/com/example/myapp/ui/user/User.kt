@@ -10,6 +10,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
@@ -117,10 +118,10 @@ fun User(
                             focusManager.clearFocus()
                             onInitView.invoke()
                         }
-                        .clip(RectangleShape)
-                        .background(color = if (isClick) colorResource(id = R.color.light_red) else colorResource(id = R.color.lawn_green))
-                        .border(width = 1.dp, color = Color.Red)
-                        .size(30.dp),
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(color = if (isClick) colorResource(id = R.color.app_color) else colorResource(id = R.color.white))
+                        .border(width = 1.dp, color = colorResource(id = R.color.app_color), shape = RoundedCornerShape(10.dp))
+                        .size(40.dp),
                 )
                 Text(text = "검색하기", textAlign = TextAlign.Center, color = if (isClick) Color.White else Color.Black, fontSize = 15.sp)
             }

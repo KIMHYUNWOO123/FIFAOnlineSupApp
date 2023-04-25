@@ -33,4 +33,8 @@ class RepositoryImpl @Inject constructor(
         return apiService.getDetailMatchRecord(matchId)
     }
 
+    override suspend fun getTransactionRecord(accessId: String, tradeType: String): List<TransactionRecordEntity> {
+        return apiService.getTransactionRecord(accessId = accessId, tradeType = tradeType)
+    }
+
 }
