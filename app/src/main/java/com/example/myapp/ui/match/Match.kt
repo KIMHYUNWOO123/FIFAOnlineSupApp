@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.domain.entity.DetailMapData
 import com.example.domain.entity.DisplayMatchData
 import com.example.domain.entity.MatchTypeData
 import com.example.myapp.R
@@ -82,9 +83,14 @@ fun Match(
                         .fillMaxHeight(1f), contentAlignment = Alignment.TopCenter
                 ) {
                     val clicked = remember { mutableStateListOf<Boolean>(*Array(displayList.value!!.size) { false }) }
+                    viewModel.getDetailDataList(displayList.value!!)
+                    val list = viewModel.detailMapDataList.observeAsState()
                     LazyColumn {
                         itemsIndexed(displayList.value!!) { index, item ->
-                            DisplayCard(item, index, isExpanded = clicked[index]) {
+                            val data: () -> List<DetailMapData> = {
+                                list.value!![index]
+                            }
+                            DisplayCard(data, item, index, isExpanded = clicked[index]) {
                                 clicked[index] = !clicked[index]
                             }
                             Spacer(modifier = Modifier.fillParentMaxHeight(0.03f))
@@ -144,8 +150,7 @@ fun MatchListCard(accessId: String, item: MatchTypeData, index: Int, selected: B
 }
 
 @Composable
-fun DisplayCard(data: DisplayMatchData, index: Int, isExpanded: Boolean, viewModel: MatchViewModel = hiltViewModel(), onClick: () -> Unit) {
-    val detailData = viewModel.detailMapData.observeAsState(null)
+fun DisplayCard(list: () -> List<DetailMapData>, data: DisplayMatchData, index: Int, isExpanded: Boolean, viewModel: MatchViewModel = hiltViewModel(), onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -231,8 +236,8 @@ fun DisplayCard(data: DisplayMatchData, index: Int, isExpanded: Boolean, viewMod
                     .fillMaxWidth()
                     .animateContentSize()
             ) {
-                if (isExpanded && detailData.value != null) {
-                    DetailView()
+                if (isExpanded) {
+                    DetailView { list() }
                 }
             }
             Row(
@@ -242,9 +247,6 @@ fun DisplayCard(data: DisplayMatchData, index: Int, isExpanded: Boolean, viewMod
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable(interactionSource = MutableInteractionSource(), indication = null) {
-                            if (!isExpanded) {
-                                viewModel.getDetailData(data.isFirst, data.matchId)
-                            }
                             onClick.invoke()
                         }, contentAlignment = Alignment.Center
                 ) {
@@ -268,192 +270,180 @@ fun EmptyView() {
 
 @Composable
 fun DetailView(
-    viewModel: MatchViewModel = hiltViewModel()
+    viewModel: MatchViewModel = hiltViewModel(),
+    data: () -> List<DetailMapData>
 ) {
-    val data by viewModel.detailMapData.observeAsState(null)
-    if (data != null) {
-        val user1 by remember {
-            mutableStateOf(data!![0])
-        }
-        val user2 by remember {
-            mutableStateOf(data!![1])
-        }
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize(0.95f)
-                    .padding(5.dp), horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                        Text(text = user1.result, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
-                        Text(text = "결과", fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                        Text(text = user2.result, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                    }
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize(0.95f)
+                .padding(5.dp), horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+                    Text(text = data.invoke()[0].result, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 }
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                        Text(text = user1.goal, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
-                        Text(text = "골", fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                        Text(text = user2.goal, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
+                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+                    Text(text = "결과", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                        Text(text = user1.totalShoot, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
-                        Text(text = "전체슛", fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                        Text(text = user2.totalShoot, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                        Text(text = user1.validShoot, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
-                        Text(text = "유효슛", fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                        Text(text = user2.validShoot, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                        Text(text = user1.shootRating, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
-                        Text(text = "슈팅성공률", fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                        Text(text = user2.shootRating, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                        Text(text = "${user1.validPass} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
-                        Text(text = "패스성공률", fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                        Text(text = "${user2.validPass} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                        Text(text = "${user1.validDefence} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
-                        Text(text = "수비성공률", fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                        Text(text = "${user2.validDefence} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                        Text(text = "${user1.validTackle} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
-                        Text(text = "태클성공률", fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                        Text(text = "${user2.validTackle} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                        Text(text = "${user1.possession} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
-                        Text(text = "점유율", fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                        Text(text = "${user2.possession} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                        Text(text = user1.offsideCount, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
-                        Text(text = "옵사이드", fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                        Text(text = user2.offsideCount, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                        Text(text = user1.yellowCards, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
-                        Text(text = "경고", fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                        Text(text = user2.yellowCards, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                        Text(text = user1.redCards, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
-                        Text(text = "퇴장", fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                        Text(text = user2.redCards, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                        Text(text = user1.foul, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
-                        Text(text = "파울", fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                        Text(text = user2.foul, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                        Text(text = user1.injury, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
-                        Text(text = "부상", fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                        Text(text = user2.injury, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                        Text(text = "${user1.averageRating} / 5.0", fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
-                        Text(text = "경기평점", fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                        Text(text = "${user2.averageRating} / 5.0", fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
+                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+                    Text(text = data.invoke()[1].result, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 }
             }
-        }
-    } else {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            LoadingBar()
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+                    Text(text = data.invoke()[0].goal, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+                    Text(text = "골", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+                    Text(text = data.invoke()[1].goal, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+                    Text(text = data.invoke()[0].totalShoot, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+                    Text(text = "전체슛", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+                    Text(text = data.invoke()[1].totalShoot, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+                    Text(text = data.invoke()[0].validShoot, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+                    Text(text = "유효슛", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+                    Text(text = data.invoke()[1].validShoot, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+                    Text(text = data.invoke()[0].shootRating, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+                    Text(text = "슈팅성공률", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+                    Text(text = data.invoke()[1].shootRating, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+                    Text(text = "${data.invoke()[0].validPass} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+                    Text(text = "패스성공률", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+                    Text(text = "${data.invoke()[1].validPass} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+                    Text(text = "${data.invoke()[0].validDefence} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+                    Text(text = "수비성공률", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+                    Text(text = "${data.invoke()[1].validDefence} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+                    Text(text = "${data.invoke()[0].validTackle} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+                    Text(text = "태클성공률", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+                    Text(text = "${data.invoke()[1].validTackle} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+                    Text(text = "${data.invoke()[0].possession} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+                    Text(text = "점유율", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+                    Text(text = "${data.invoke()[1].possession} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+                    Text(text = data.invoke()[0].offsideCount, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+                    Text(text = "옵사이드", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+                    Text(text = data.invoke()[1].offsideCount, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+                    Text(text = data.invoke()[0].yellowCards, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+                    Text(text = "경고", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+                    Text(text = data.invoke()[1].yellowCards, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+                    Text(text = data.invoke()[0].redCards, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+                    Text(text = "퇴장", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+                    Text(text = data.invoke()[1].redCards, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+                    Text(text = data.invoke()[0].foul, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+                    Text(text = "파울", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+                    Text(text = data.invoke()[1].foul, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+                    Text(text = data.invoke()[0].injury, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+                    Text(text = "부상", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+                    Text(text = data.invoke()[1].injury, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+                    Text(text = "${data.invoke()[0].averageRating} / 5.0", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+                    Text(text = "경기평점", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+                    Text(text = "${data.invoke()[1].averageRating} / 5.0", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+            }
         }
     }
 }

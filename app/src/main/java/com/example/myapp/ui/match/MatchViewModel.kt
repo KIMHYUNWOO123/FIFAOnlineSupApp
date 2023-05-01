@@ -29,8 +29,8 @@ class MatchViewModel @Inject constructor(
     private val _matchRecordList = MutableLiveData<List<String>>()
     val matchRecordList: LiveData<List<String>> = _matchRecordList
 
-    private val _detailMapData = MutableLiveData<List<DetailMapData>>()
-    val detailMapData: LiveData<List<DetailMapData>> = _detailMapData
+    private val _detailMapDataList = MutableLiveData<List<List<DetailMapData>>>()
+    val detailMapDataList: LiveData<List<List<DetailMapData>>> = _detailMapDataList
 
     private val _displayMatchData = MutableLiveData<List<DisplayMatchData>>()
     val displayMatchData: LiveData<List<DisplayMatchData>> = _displayMatchData
@@ -97,7 +97,7 @@ class MatchViewModel @Inject constructor(
         }
     }
 
-    fun getDetailData(isFirst: Boolean, matchId: String) {
+    fun getDetailDataList(data: List<DisplayMatchData>) {
         isLoading.postValue(true)
         myJob?.cancel()
         myJob = viewModelScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, t ->
@@ -105,20 +105,18 @@ class MatchViewModel @Inject constructor(
             Log.d("MatchViewModel", "Exception: $t")
             error.postValue(t.message.toString())
         }) {
-            runBlocking {
-                val result = async {
-                    val data = matchUseCase.getDetailMatchRecord(matchId)
-                    mapper.detailDataMap(isFirst, data)
+            withContext(Dispatchers.IO) {
+                val list = mutableListOf<List<DetailMapData>>()
+                for ((i, item) in data.withIndex()) {
+                    val detailData = matchUseCase.getDetailMatchRecord(item.matchId)
+                    list.add(i, mapper.detailDataMap(item.isFirst, detailData))
                 }
-                _detailMapData.postValue(result.await())
-
+                _detailMapDataList.postValue(list)
+            }
+            myJob?.invokeOnCompletion {
+                isLoading.postValue(false)
             }
         }
-        myJob?.invokeOnCompletion {
-            isLoading.postValue(false)
-        }
-
-
     }
 
     override fun onCleared() {
