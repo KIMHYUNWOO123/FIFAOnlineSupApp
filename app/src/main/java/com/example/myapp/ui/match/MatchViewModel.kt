@@ -116,11 +116,12 @@ class MatchViewModel @Inject constructor(
                     list.add(i, mapper.detailDataMap(item.isFirst, detailData))
                 }
                 _detailMapDataList.postValue(list)
+
             }
-        }
-        myMappingJob?.invokeOnCompletion { t ->
-            if (t == null) {
-                isDetailLoading.postValue(false)
+            myMappingJob?.invokeOnCompletion { t ->
+                if (t == null) {
+                    isDetailLoading.postValue(false)
+                }
             }
         }
     }
