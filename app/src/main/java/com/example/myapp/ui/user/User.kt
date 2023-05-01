@@ -207,9 +207,9 @@ fun User(
                 EmptyView()
             }
         }
-    }
-    if (isLoading!!) {
-        LoadingBar()
+        if (isLoading!!) {
+            LoadingBar()
+        }
     }
 }
 

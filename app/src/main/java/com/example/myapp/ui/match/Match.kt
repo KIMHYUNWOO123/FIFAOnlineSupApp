@@ -44,6 +44,7 @@ fun Match(
     }
     val isLoading = viewModel.isLoading.observeAsState()
     val isMatchRecordLoading = viewModel.isMatchRecordLoading.observeAsState()
+    val isDetailLoading = viewModel.isDetailLoading.observeAsState()
     val matchList = viewModel.matchTypeList.observeAsState()
     val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     val displayList = viewModel.displayMatchData.observeAsState()
@@ -76,14 +77,13 @@ fun Match(
                     matchList.value!!
                 }
             }
-            if (!displayList.value.isNullOrEmpty() && isMatchRecordLoading.value == false) {
+            if (!displayList.value.isNullOrEmpty() && isMatchRecordLoading.value == false && isDetailLoading.value == false) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.95f)
                         .fillMaxHeight(1f), contentAlignment = Alignment.TopCenter
                 ) {
                     val clicked = remember { mutableStateListOf<Boolean>(*Array(displayList.value!!.size) { false }) }
-                    viewModel.getDetailDataList(displayList.value!!)
                     val list = viewModel.detailMapDataList.observeAsState()
                     LazyColumn {
                         itemsIndexed(displayList.value!!) { index, item ->
@@ -98,12 +98,12 @@ fun Match(
                     }
                 }
             }
-            if (displayList.value.isNullOrEmpty() && isMatchRecordLoading.value == false) {
+            if (displayList.value.isNullOrEmpty() && isMatchRecordLoading.value == false && isDetailLoading.value == false) {
                 EmptyView()
             }
-            if (isLoading.value!! || isMatchRecordLoading.value!!) {
-                LoadingBar()
-            }
+        }
+        if (isLoading.value!! || isMatchRecordLoading.value!! || isDetailLoading.value!!) {
+            LoadingBar()
         }
     }
 }

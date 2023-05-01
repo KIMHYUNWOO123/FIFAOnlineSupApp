@@ -37,9 +37,11 @@ class MatchViewModel @Inject constructor(
 
     val isLoading: MutableLiveData<Boolean> = MutableLiveData(false)
     val isMatchRecordLoading: MutableLiveData<Boolean> = MutableLiveData(false)
+    val isDetailLoading: MutableLiveData<Boolean> = MutableLiveData(false)
     val error: MutableLiveData<String> = MutableLiveData("")
     private var myJob: Job? = null
     private var myDetailJob: Job? = null
+    private var myMappingJob: Job? = null
     fun getMatchTypeList() {
         isLoading.postValue(true)
         myJob?.cancel()
@@ -79,30 +81,32 @@ class MatchViewModel @Inject constructor(
             Log.d("MatchViewModel", "Exception: $t")
             error.postValue(t.message.toString())
         }) {
-            val detailMatchList = mutableListOf<DetailMatchRecordEntity>()
-            for ((i, item) in list.withIndex()) {
-                val result = matchUseCase.getDetailMatchRecord(item)
-                result.let { detailMatchList.add(i, it) }
-            }
-            val result = mapper.displayMatchDataMap(accessId, detailMatchList)
-            result.let {
-                _displayMatchData.postValue(it)
+            withContext(Dispatchers.IO) {
+                val detailMatchList = mutableListOf<DetailMatchRecordEntity>()
+                for ((i, item) in list.withIndex()) {
+                    val result = matchUseCase.getDetailMatchRecord(item)
+                    result.let { detailMatchList.add(i, it) }
+                }
+                val result = mapper.displayMatchDataMap(accessId, detailMatchList)
+                result.let {
+                    _displayMatchData.postValue(it)
+                    getDetailDataList(it)
+                }
             }
         }
         myDetailJob?.invokeOnCompletion { t ->
             if (t == null) {
                 isMatchRecordLoading.postValue(false)
             }
-
         }
     }
 
-    fun getDetailDataList(data: List<DisplayMatchData>) {
-        isLoading.postValue(true)
-        myJob?.cancel()
-        myJob = viewModelScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, t ->
-            isLoading.postValue(false)
+    private fun getDetailDataList(data: List<DisplayMatchData>) {
+        myMappingJob?.cancel()
+        isDetailLoading.postValue(true)
+        myMappingJob = viewModelScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, t ->
             Log.d("MatchViewModel", "Exception: $t")
+            isDetailLoading.postValue(false)
             error.postValue(t.message.toString())
         }) {
             withContext(Dispatchers.IO) {
@@ -113,8 +117,10 @@ class MatchViewModel @Inject constructor(
                 }
                 _detailMapDataList.postValue(list)
             }
-            myJob?.invokeOnCompletion {
-                isLoading.postValue(false)
+        }
+        myMappingJob?.invokeOnCompletion { t ->
+            if (t == null) {
+                isDetailLoading.postValue(false)
             }
         }
     }
@@ -123,5 +129,6 @@ class MatchViewModel @Inject constructor(
         super.onCleared()
         myJob?.cancel()
         myDetailJob?.cancel()
+        myMappingJob?.cancel()
     }
 }

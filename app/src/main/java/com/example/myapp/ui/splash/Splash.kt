@@ -9,8 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
@@ -42,10 +42,10 @@ fun Splash(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White), contentAlignment = Alignment.Center
+            .background(color = colorResource(id = R.color.splash)), contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = rememberAsyncImagePainter(ImageRequest.Builder(context).data(data = R.drawable.splash).apply(block = {
+            painter = rememberAsyncImagePainter(ImageRequest.Builder(context).data(data = R.drawable.splash1).apply(block = {
                 size(Size.ORIGINAL)
             }).build(), imageLoader = imageLoader),
             contentDescription = null,
