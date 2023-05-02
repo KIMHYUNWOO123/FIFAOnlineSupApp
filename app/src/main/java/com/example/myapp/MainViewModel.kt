@@ -3,10 +3,7 @@ package com.example.myapp
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.domain.entity.DivisionData
-import com.example.domain.entity.DivisionEntity
-import com.example.domain.entity.MatchTypeData
-import com.example.domain.entity.MatchTypeEntity
+import com.example.domain.entity.*
 import com.example.domain.usecase.MetaDataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -29,12 +26,20 @@ class MainViewModel @Inject constructor(
             }) {
                 val matchResult = useCase.apiMatchData()
                 val divisionResult = useCase.apiDivisionData()
+                val spIdResult = useCase.apiSpIdData()
+                val seasonResult = useCase.apiSeasonIdData()
                 withContext(Dispatchers.IO) {
                     matchResult.let {
                         useCase.insertMatch(matchMap(it))
                     }
                     divisionResult.let {
                         useCase.insertDivision(divisionMap(it))
+                    }
+                    spIdResult.let {
+                        useCase.insertSpId(spIdMap(it))
+                    }
+                    seasonResult.let {
+                        useCase.insertSeasonId(seasonIdMap(it))
                     }
                 }
             }.invokeOnCompletion {
@@ -64,6 +69,33 @@ class MainViewModel @Inject constructor(
                 i, DivisionData(
                     divisionId = item.divisionId,
                     divisionName = item.divisionName
+                )
+            )
+        }
+        return list.toList()
+    }
+
+    private fun spIdMap(data: List<SpIdEntity>): List<SpIdData> {
+        val list = mutableListOf<SpIdData>()
+        data.forEachIndexed { i, item ->
+            list.add(
+                i, SpIdData(
+                    id = item.id,
+                    name = item.name
+                )
+            )
+        }
+        return list.toList()
+    }
+
+    private fun seasonIdMap(data: List<SeasonIdEntity>): List<SeasonIdData> {
+        val list = mutableListOf<SeasonIdData>()
+        data.forEachIndexed { i, item ->
+            list.add(
+                i, SeasonIdData(
+                    seasonId = item.seasonId,
+                    className = item.className,
+                    seasonImg = item.seasonImg
                 )
             )
         }

@@ -17,14 +17,6 @@ class RepositoryImpl @Inject constructor(
         return apiService.getBestRank(accessId)
     }
 
-    override suspend fun getMatchData(): List<MatchTypeEntity> {
-        return metaApiService.getMatchTypeJson()
-    }
-
-    override suspend fun getDivisionData(): List<DivisionEntity> {
-        return metaApiService.getDivisionJson()
-    }
-
     override suspend fun getMatchRecord(accessId: String, matchType: Int): List<String> {
         return apiService.getMatchRecord(accessId = accessId, matchType = matchType)
     }
@@ -36,5 +28,23 @@ class RepositoryImpl @Inject constructor(
     override suspend fun getTransactionRecord(accessId: String, tradeType: String): List<TransactionRecordEntity> {
         return apiService.getTransactionRecord(accessId = accessId, tradeType = tradeType)
     }
+
+    // Meta
+    override suspend fun getMatchData(): List<MatchTypeEntity> {
+        return metaApiService.getMatchTypeJson()
+    }
+
+    override suspend fun getDivisionData(): List<DivisionEntity> {
+        return metaApiService.getDivisionJson()
+    }
+
+    override suspend fun getSpIdData(): List<SpIdEntity> {
+        return metaApiService.getSpIdJson()
+    }
+
+    override suspend fun getSeasonIdData(): List<SeasonIdEntity> {
+        return metaApiService.getSeasonIdJson()
+    }
+
 
 }

@@ -41,7 +41,7 @@ class UserViewModel @Inject constructor(
         val nickName = nickname.replace(" ", "")
         isLoading.postValue(true)
         viewModelScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, t ->
-            Log.d("UserViewModel", "Exception: $t")
+            Log.d("getUserData", "Exception: $t")
             isLoading.postValue(false)
             error.value = if (t.message!!.contains("400")) "사용자 정보가 없습니다" else t.message
         }) {
@@ -49,7 +49,6 @@ class UserViewModel @Inject constructor(
             error.value = ""
             val result = useCase.getUserData(nickName)
             result.let {
-                Log.d("UserViewModel", "getUserData: $it")
                 _userData.postValue(it.nickname)
                 _userLevel.postValue(it.level.toString())
                 _userAccessId.postValue(it.accessId)
@@ -60,9 +59,8 @@ class UserViewModel @Inject constructor(
     }
 
     private fun getBestRank(accessId: String) {
-        isLoading.postValue(true)
         viewModelScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, t ->
-            Log.d("Exception", "getBestRank: $t")
+            Log.d("getBestRank", "Exception: $t")
             isLoading.postValue(false)
         }) {
             error.value = ""

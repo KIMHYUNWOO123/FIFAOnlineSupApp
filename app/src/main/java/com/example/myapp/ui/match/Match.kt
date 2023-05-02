@@ -325,13 +325,13 @@ fun DetailView(
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                    Text(text = data.invoke()[0].shootRating, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "${data.invoke()[0].shootRating} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
                     Text(text = "슈팅성공률", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                    Text(text = data.invoke()[1].shootRating, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "${data.invoke()[1].shootRating} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Row(modifier = Modifier.fillMaxWidth()) {

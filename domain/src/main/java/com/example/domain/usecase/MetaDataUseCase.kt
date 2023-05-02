@@ -3,10 +3,7 @@ package com.example.domain.usecase
 import com.example.domain.DaoRepository
 import com.example.domain.Repository
 import com.example.domain.SharedPreferencesService
-import com.example.domain.entity.DivisionData
-import com.example.domain.entity.DivisionEntity
-import com.example.domain.entity.MatchTypeData
-import com.example.domain.entity.MatchTypeEntity
+import com.example.domain.entity.*
 import javax.inject.Inject
 
 class MetaDataUseCase @Inject constructor(
@@ -36,6 +33,21 @@ class MetaDataUseCase @Inject constructor(
         return daoRepository.getDivision()
     }
 
+    suspend fun insertSpId(list: List<SpIdData>) {
+        daoRepository.insertSpId(list)
+    }
+
+    suspend fun getSpId(): List<SpIdData> {
+        return daoRepository.getSpId()
+    }
+
+    suspend fun insertSeasonId(list: List<SeasonIdData>) {
+        daoRepository.insertSeasonId(list)
+    }
+
+    suspend fun getSeasonId(): List<SeasonIdData> {
+        return daoRepository.getSeasonId()
+    }
 
     // api
     suspend fun apiMatchData(): List<MatchTypeEntity> {
@@ -46,6 +58,13 @@ class MetaDataUseCase @Inject constructor(
         return repository.getDivisionData()
     }
 
+    suspend fun apiSpIdData(): List<SpIdEntity> {
+        return repository.getSpIdData()
+    }
+
+    suspend fun apiSeasonIdData(): List<SeasonIdEntity> {
+        return repository.getSeasonIdData()
+    }
 
     // pref
     fun setMatchSaveTime(time: String) {

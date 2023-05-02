@@ -158,7 +158,7 @@ fun User(
                         Text(text = level.toString(), fontSize = 25.sp)
                     }
                 }
-                if (!bestRankList.isNullOrEmpty()) {
+                if (!bestRankList.isNullOrEmpty() && isLoading == false) {
                     Column(modifier = Modifier.wrapContentHeight()) {
                         Box(
                             modifier = Modifier
