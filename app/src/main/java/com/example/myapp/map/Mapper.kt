@@ -1,6 +1,7 @@
 package com.example.myapp.map
 
 import com.example.domain.entity.*
+import java.text.DecimalFormat
 import java.util.*
 import kotlin.math.roundToInt
 
@@ -126,5 +127,29 @@ class Mapper {
             Collections.swap(returnList, 0, 1)
         }
         return returnList.toList()
+    }
+
+    fun transactionMap(transactionRecord: List<TransactionRecordEntity>, seasonIdData: List<SeasonIdData>, spIdData: List<SpIdData>): List<TransactionData> {
+        val list = mutableListOf<TransactionData>()
+        for ((i, item) in transactionRecord.withIndex()) {
+            val name = spIdData.filter { it.id == item.spId }.map { it.name }
+            val data = seasonIdData.filter { it.seasonId == item.spId.toString().substring(0 until 3).toInt() }.map { it }
+            val date = item.tradeDate.replace("T", " ")
+            val format = DecimalFormat("#,###")
+            val value = format.format(item.value)
+            list.add(
+                i, TransactionData(
+                    name = name.joinToString(),
+                    className = data[0].className,
+                    img = data[0].seasonImg,
+                    tradeDate = date,
+                    saleSn = item.saleSn,
+                    spId = item.spId,
+                    grade = item.grade,
+                    value = value.toString()
+                )
+            )
+        }
+        return list.toList()
     }
 }

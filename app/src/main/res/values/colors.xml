@@ -13,4 +13,12 @@
     <color name="win">#2360DB</color>
     <color name="defeat">#F13559</color>
     <color name="splash">#84c77a</color>
+    <color name="basic">#4A4F52</color>
+    <color name="bronze">#C07452</color>
+    <color name="silver">#C7CAD1</color>
+    <color name="gold">#EFC731</color>
+    <color name="basicTextColor">#ABB0B3</color>
+    <color name="bronzeTextColor">#905137</color>
+    <color name="silverTextColor">#626972</color>
+    <color name="goldTextColor">#634D00</color>
 </resources>

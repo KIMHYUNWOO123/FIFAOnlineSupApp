@@ -49,6 +49,18 @@ class MetaDataUseCase @Inject constructor(
         return daoRepository.getSeasonId()
     }
 
+    suspend fun insertSpPosition(list: List<SpPositionData>) {
+        daoRepository.insertSpPosition(list)
+    }
+
+    suspend fun getSpPosition(): List<SpPositionData> {
+        return daoRepository.getSpPosition()
+    }
+
+    suspend fun getFindDesc(spPosition: Int): String {
+        return daoRepository.getFindDesc(spPosition)
+    }
+
     // api
     suspend fun apiMatchData(): List<MatchTypeEntity> {
         return repository.getMatchData()
@@ -64,6 +76,10 @@ class MetaDataUseCase @Inject constructor(
 
     suspend fun apiSeasonIdData(): List<SeasonIdEntity> {
         return repository.getSeasonIdData()
+    }
+
+    suspend fun apiSpPositionData(): List<SpPositionEntity> {
+        return repository.getSpPositionData()
     }
 
     // pref

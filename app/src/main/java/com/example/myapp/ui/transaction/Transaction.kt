@@ -7,10 +7,16 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
@@ -19,7 +25,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberAsyncImagePainter
+import com.example.domain.entity.TransactionData
 import com.example.myapp.R
+import com.example.myapp.utils.LoadingBar
 
 @Composable
 fun Transaction(
@@ -32,6 +41,8 @@ fun Transaction(
     LaunchedEffect(Unit) {
         viewModel.getTransactionRecord(accessId, if (isBuy) "buy" else "sell")
     }
+    val transactionData by viewModel.transactionData.observeAsState()
+    val isLoading by viewModel.isLoading.observeAsState()
     val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Box(
@@ -88,6 +99,57 @@ fun Transaction(
                 ) {
                     Text("판매내역", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = if (!isBuy) Color.White else colorResource(id = R.color.app_color))
                 }
+            }
+            Divider(thickness = 1.dp, color = Color.LightGray)
+            if (!isLoading!! && transactionData != null) {
+                LazyColumn {
+                    items(transactionData!!) {
+                        TransactionCard(data = it)
+                        Divider(thickness = 1.dp, color = Color.DarkGray)
+                    }
+                }
+            }
+        }
+        if (isLoading!!) {
+            LoadingBar()
+        }
+    }
+}
+
+@Composable
+fun TransactionCard(data: TransactionData) {
+    val color = when (data.grade) {
+        1 -> colorResource(id = R.color.basic)
+        2, 3, 4 -> colorResource(id = R.color.bronze)
+        5, 6, 7 -> colorResource(id = R.color.silver)
+        else -> colorResource(id = R.color.gold)
+    }
+    val textColor = when (data.grade) {
+        1 -> colorResource(id = R.color.basicTextColor)
+        2, 3, 4 -> colorResource(id = R.color.bronzeTextColor)
+        5, 6, 7 -> colorResource(id = R.color.silverTextColor)
+        else -> colorResource(id = R.color.goldTextColor)
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(10.dp)
+    ) {
+        Row {
+            Image(
+                painter = rememberAsyncImagePainter(model = data.img),
+                contentDescription = null,
+                modifier = Modifier.size(25.dp)
+            )
+            Text(text = data.name)
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(5.dp))
+                    .background(color = color)
+                    .padding(5.dp), contentAlignment = Alignment.Center
+            ) {
+                Text(text = data.grade.toString(), color = textColor, fontWeight = FontWeight.Bold)
             }
         }
     }

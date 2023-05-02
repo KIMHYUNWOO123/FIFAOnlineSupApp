@@ -2,10 +2,7 @@ package com.example.data
 
 import com.example.data.db.Database
 import com.example.domain.DaoRepository
-import com.example.domain.entity.DivisionData
-import com.example.domain.entity.MatchTypeData
-import com.example.domain.entity.SeasonIdData
-import com.example.domain.entity.SpIdData
+import com.example.domain.entity.*
 import javax.inject.Inject
 
 class DaoRepositoryImpl @Inject constructor(
@@ -32,11 +29,11 @@ class DaoRepositoryImpl @Inject constructor(
     }
 
     override suspend fun insertSpId(list: List<SpIdData>) {
-        db.SpIdDao().insertSpId(list)
+        db.spIdDao().insertSpId(list)
     }
 
     override suspend fun getSpId(): List<SpIdData> {
-        return db.SpIdDao().getSpId()
+        return db.spIdDao().getSpId()
     }
 
     override suspend fun insertSeasonId(list: List<SeasonIdData>) {
@@ -45,6 +42,18 @@ class DaoRepositoryImpl @Inject constructor(
 
     override suspend fun getSeasonId(): List<SeasonIdData> {
         return db.seasonIdDao().getSeasonId()
+    }
+
+    override suspend fun insertSpPosition(list: List<SpPositionData>) {
+        db.spPositionDao().insertSpPosition(list)
+    }
+
+    override suspend fun getSpPosition(): List<SpPositionData> {
+        return db.spPositionDao().getSpPosition()
+    }
+
+    override suspend fun getFindDesc(spPosition: Int): String {
+        return db.spPositionDao().getFindDesc(spPosition)
     }
 
 

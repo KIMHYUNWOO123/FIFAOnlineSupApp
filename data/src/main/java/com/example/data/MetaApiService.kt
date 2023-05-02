@@ -1,9 +1,6 @@
 package com.example.data
 
-import com.example.domain.entity.DivisionEntity
-import com.example.domain.entity.MatchTypeEntity
-import com.example.domain.entity.SeasonIdEntity
-import com.example.domain.entity.SpIdEntity
+import com.example.domain.entity.*
 import retrofit2.http.GET
 
 interface MetaApiService {
@@ -19,4 +16,7 @@ interface MetaApiService {
 
     @GET("seasonid.json")
     suspend fun getSeasonIdJson(): List<SeasonIdEntity>
+
+    @GET("spposition.json")
+    suspend fun getSpPositionJson(): List<SpPositionEntity>
 }

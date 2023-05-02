@@ -1,9 +1,6 @@
 package com.example.domain
 
-import com.example.domain.entity.DivisionData
-import com.example.domain.entity.MatchTypeData
-import com.example.domain.entity.SeasonIdData
-import com.example.domain.entity.SpIdData
+import com.example.domain.entity.*
 
 interface DaoRepository {
     suspend fun insertTypeMatch(list: List<MatchTypeData>)
@@ -22,4 +19,9 @@ interface DaoRepository {
 
     suspend fun getSeasonId(): List<SeasonIdData>
 
+    suspend fun insertSpPosition(list: List<SpPositionData>)
+
+    suspend fun getSpPosition(): List<SpPositionData>
+
+    suspend fun getFindDesc(spPosition: Int): String
 }

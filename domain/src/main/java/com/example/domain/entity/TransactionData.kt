@@ -1,14 +1,15 @@
 package com.example.domain.entity
 
 import androidx.annotation.Keep
-import com.google.gson.annotations.SerializedName
 
 @Keep
-data class TransactionRecordEntity(
+data class TransactionData(
+    val name: String,
+    val className: String,
+    val img: String,
     val tradeDate: String,
     val saleSn: String,
-    @SerializedName("spid")
     val spId: Int,
     val grade: Int,
-    val value: Long
+    val value: String
 )

@@ -18,4 +18,6 @@ interface Repository {
     suspend fun getSpIdData(): List<SpIdEntity>
 
     suspend fun getSeasonIdData(): List<SeasonIdEntity>
+
+    suspend fun getSpPositionData(): List<SpPositionEntity>
 }

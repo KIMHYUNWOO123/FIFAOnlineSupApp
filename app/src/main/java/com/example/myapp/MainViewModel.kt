@@ -28,6 +28,7 @@ class MainViewModel @Inject constructor(
                 val divisionResult = useCase.apiDivisionData()
                 val spIdResult = useCase.apiSpIdData()
                 val seasonResult = useCase.apiSeasonIdData()
+                val spPositionResult = useCase.apiSpPositionData()
                 withContext(Dispatchers.IO) {
                     matchResult.let {
                         useCase.insertMatch(matchMap(it))
@@ -40,6 +41,9 @@ class MainViewModel @Inject constructor(
                     }
                     seasonResult.let {
                         useCase.insertSeasonId(seasonIdMap(it))
+                    }
+                    spPositionResult.let {
+                        useCase.insertSpPosition(spPositionMap(it))
                     }
                 }
             }.invokeOnCompletion {
@@ -96,6 +100,19 @@ class MainViewModel @Inject constructor(
                     seasonId = item.seasonId,
                     className = item.className,
                     seasonImg = item.seasonImg
+                )
+            )
+        }
+        return list.toList()
+    }
+
+    private fun spPositionMap(data: List<SpPositionEntity>): List<SpPositionData> {
+        val list = mutableListOf<SpPositionData>()
+        data.forEachIndexed { i, item ->
+            list.add(
+                i, SpPositionData(
+                    spPosition = item.spPosition,
+                    desc = item.desc
                 )
             )
         }

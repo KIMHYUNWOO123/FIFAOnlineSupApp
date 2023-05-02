@@ -46,5 +46,9 @@ class RepositoryImpl @Inject constructor(
         return metaApiService.getSeasonIdJson()
     }
 
+    override suspend fun getSpPositionData(): List<SpPositionEntity> {
+        return metaApiService.getSpPositionJson()
+    }
+
 
 }
