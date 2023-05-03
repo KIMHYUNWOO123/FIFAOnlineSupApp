@@ -100,7 +100,6 @@ fun Transaction(
                     Text("판매내역", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = if (!isBuy) Color.White else colorResource(id = R.color.app_color))
                 }
             }
-            Divider(thickness = 1.dp, color = Color.LightGray)
             if (!isLoading!! && transactionData != null) {
                 LazyColumn {
                     items(transactionData!!) {
