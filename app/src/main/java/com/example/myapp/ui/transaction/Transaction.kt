@@ -146,9 +146,9 @@ fun TransactionCard(data: TransactionData, isBuy: Boolean) {
                     contentDescription = null,
                     modifier = Modifier.size(25.dp)
                 )
-                Spacer(modifier = Modifier.fillMaxWidth(0.05f))
-                Text(text = data.name, fontSize = 13.sp)
-                Spacer(modifier = Modifier.fillMaxWidth(0.05f))
+                Spacer(modifier = Modifier.fillMaxWidth(0.01f))
+                Text(text = data.name, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
+                Spacer(modifier = Modifier.fillMaxWidth(0.01f))
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(5.dp))
