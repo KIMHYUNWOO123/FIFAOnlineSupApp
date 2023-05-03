@@ -21,4 +21,6 @@
     <color name="bronzeTextColor">#905137</color>
     <color name="silverTextColor">#626972</color>
     <color name="goldTextColor">#634D00</color>
+    <color name="sellTextColor">#3377A4</color>
+    <color name="buyTextColor">#8C0808</color>
 </resources>

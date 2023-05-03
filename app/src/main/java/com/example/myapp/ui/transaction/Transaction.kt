@@ -104,8 +104,8 @@ fun Transaction(
             if (!isLoading!! && transactionData != null) {
                 LazyColumn {
                     items(transactionData!!) {
-                        TransactionCard(data = it)
-                        Divider(thickness = 1.dp, color = Color.DarkGray)
+                        TransactionCard(data = it, isBuy)
+                        Divider(thickness = 1.dp, color = colorResource(id = R.color.app_color))
                     }
                 }
             }
@@ -117,7 +117,7 @@ fun Transaction(
 }
 
 @Composable
-fun TransactionCard(data: TransactionData) {
+fun TransactionCard(data: TransactionData, isBuy: Boolean) {
     val color = when (data.grade) {
         1 -> colorResource(id = R.color.basic)
         2, 3, 4 -> colorResource(id = R.color.bronze)
@@ -134,22 +134,53 @@ fun TransactionCard(data: TransactionData) {
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(10.dp)
+            .padding(10.dp), contentAlignment = Alignment.Center
     ) {
-        Row {
-            Image(
-                painter = rememberAsyncImagePainter(model = data.img),
-                contentDescription = null,
-                modifier = Modifier.size(25.dp)
-            )
-            Text(text = data.name)
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(5.dp))
-                    .background(color = color)
-                    .padding(5.dp), contentAlignment = Alignment.Center
+        Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween, Alignment.CenterVertically) {
+            Row(
+                Modifier
+                    .wrapContentHeight(), verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = data.grade.toString(), color = textColor, fontWeight = FontWeight.Bold)
+                Image(
+                    painter = rememberAsyncImagePainter(model = data.img),
+                    contentDescription = null,
+                    modifier = Modifier.size(25.dp)
+                )
+                Spacer(modifier = Modifier.fillMaxWidth(0.05f))
+                Text(text = data.name, fontSize = 13.sp)
+                Spacer(modifier = Modifier.fillMaxWidth(0.05f))
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(color = color)
+                        .size(25.dp), contentAlignment = Alignment.Center
+                ) {
+                    Text(text = data.grade.toString(), color = textColor, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                }
+            }
+            Column(Modifier.fillMaxHeight()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth()
+                        .padding(end = 5.dp), contentAlignment = Alignment.CenterEnd
+                ) {
+                    Text(text = data.tradeDate, fontSize = 10.sp)
+                }
+                Spacer(modifier = Modifier.fillMaxHeight(0.05f))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight()
+                        .padding(end = 5.dp), contentAlignment = Alignment.CenterEnd
+                ) {
+                    Text(
+                        text = "${data.value} BP",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isBuy) colorResource(id = R.color.buyTextColor) else colorResource(id = R.color.sellTextColor)
+                    )
+                }
             }
         }
     }
