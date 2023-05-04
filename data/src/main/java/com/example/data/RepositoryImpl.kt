@@ -1,7 +1,11 @@
 package com.example.data
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.example.domain.Repository
 import com.example.domain.entity.*
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -48,6 +52,17 @@ class RepositoryImpl @Inject constructor(
 
     override suspend fun getSpPositionData(): List<SpPositionEntity> {
         return metaApiService.getSpPositionJson()
+    }
+
+    override suspend fun getMatchRecordPagingData(accessId: String, matchType: Int): Flow<PagingData<MatchDetailData>> {
+        val pagingFactory = { PagingSource(apiService, accessId, matchType) }
+        return Pager(
+            config = PagingConfig(
+                pageSize = 30,
+                maxSize = 30 * 3
+            ),
+            pagingSourceFactory = pagingFactory
+        ).flow
     }
 
 

@@ -5,15 +5,17 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.domain.entity.DetailMapData
-import com.example.domain.entity.DetailMatchRecordEntity
-import com.example.domain.entity.DisplayMatchData
-import com.example.domain.entity.MatchTypeData
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import com.example.domain.entity.*
 import com.example.domain.usecase.MatchUseCase
 import com.example.domain.usecase.MetaDataUseCase
 import com.example.myapp.map.Mapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
@@ -85,7 +87,9 @@ class MatchViewModel @Inject constructor(
                 val detailMatchList = mutableListOf<DetailMatchRecordEntity>()
                 for ((i, item) in list.withIndex()) {
                     val result = matchUseCase.getDetailMatchRecord(item)
-                    result.let { detailMatchList.add(i, it) }
+                    result.let {
+                        detailMatchList.add(i, it)
+                    }
                 }
                 val result = mapper.displayMatchDataMap(accessId, detailMatchList)
                 result.let {
@@ -123,6 +127,22 @@ class MatchViewModel @Inject constructor(
                     isDetailLoading.postValue(false)
                 }
             }
+        }
+    }
+
+    private val _matchRecordPagingData = MutableStateFlow<PagingData<MatchDetailData>>(PagingData.empty())
+    val matchRecordPagingData: StateFlow<PagingData<MatchDetailData>> = _matchRecordPagingData.asStateFlow()
+    fun getMatchRecordPagingData(accessId: String, matchType: Int) {
+        myJob?.cancel()
+        myJob = viewModelScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, t ->
+            error.postValue(t.message)
+            isMatchRecordLoading.postValue(false)
+        }) {
+            matchUseCase.getMatchRecordPagingData(accessId, matchType)
+                .cachedIn(viewModelScope)
+                .collect {
+                    _matchRecordPagingData.value = it
+                }
         }
     }
 

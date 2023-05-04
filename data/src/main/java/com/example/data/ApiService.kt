@@ -36,4 +36,12 @@ interface ApiService {
         @Path("accessid", encoded = true) accessId: String,
         @Query("tradetype") tradeType: String
     ): List<TransactionRecordEntity>
+
+    @GET("users/{accessid}/matches")
+    suspend fun getMatchRecord1(
+        @Path("accessid", encoded = true) accessId: String,
+        @Query("matchtype") matchType: Int,
+        @Query("offset") offset: Int,
+        @Query("limit") limit: Int
+    ): List<String>
 }

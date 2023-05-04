@@ -29,10 +29,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.domain.entity.DetailMapData
-import com.example.domain.entity.DisplayMatchData
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemsIndexed
+import com.example.domain.entity.MatchDetailData
 import com.example.domain.entity.MatchTypeData
 import com.example.myapp.R
+import com.example.myapp.utils.CircleLoadingBar
 import com.example.myapp.utils.LoadingBar
 
 @Composable
@@ -42,12 +45,16 @@ fun Match(
     LaunchedEffect(Unit) {
         viewModel.getMatchTypeList()
     }
-    val isLoading = viewModel.isLoading.observeAsState()
-    val isMatchRecordLoading = viewModel.isMatchRecordLoading.observeAsState()
-    val isDetailLoading = viewModel.isDetailLoading.observeAsState()
+    var pagingLoading by remember {
+        mutableStateOf(false)
+    }
+
+    var isLoading by remember {
+        mutableStateOf(false)
+    }
     val matchList = viewModel.matchTypeList.observeAsState()
     val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-    val displayList = viewModel.displayMatchData.observeAsState()
+    val pagingData = viewModel.matchRecordPagingData.collectAsLazyPagingItems()
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Box(
             modifier = Modifier
@@ -77,34 +84,40 @@ fun Match(
                     matchList.value!!
                 }
             }
-            if (!displayList.value.isNullOrEmpty() && isMatchRecordLoading.value == false && isDetailLoading.value == false) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.95f)
-                        .fillMaxHeight(1f), contentAlignment = Alignment.TopCenter
-                ) {
-                    val clicked = remember { mutableStateListOf<Boolean>(*Array(displayList.value!!.size) { false }) }
-                    val list = viewModel.detailMapDataList.observeAsState()
-                    LazyColumn {
-                        itemsIndexed(displayList.value!!) { index, item ->
-                            val data: () -> List<DetailMapData> = {
-                                list.value!![index]
+            when (pagingData.loadState.refresh) {
+                LoadState.Loading -> {
+                    isLoading = true
+                }
+                else -> {
+                    isLoading = false
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.95f)
+                            .fillMaxHeight(1f), contentAlignment = Alignment.TopCenter
+                    ) {
+                        val clicked = remember { mutableStateListOf<Boolean>(*Array(300) { false }) }
+                        LazyColumn {
+                            itemsIndexed(pagingData) { index, item ->
+                                if (item != null) {
+                                    DisplayCard(list = { item }, index = index, isExpanded = clicked[index]) {
+                                        clicked[index] = !clicked[index]
+                                    }
+                                    Spacer(modifier = Modifier.fillParentMaxHeight(0.03f))
+                                } else {
+                                    CircleLoadingBar()
+                                }
                             }
-                            DisplayCard(data, item, index, isExpanded = clicked[index]) {
-                                clicked[index] = !clicked[index]
-                            }
-                            Spacer(modifier = Modifier.fillParentMaxHeight(0.03f))
                         }
                     }
                 }
             }
-            if (displayList.value.isNullOrEmpty() && isMatchRecordLoading.value == false && isDetailLoading.value == false) {
-                EmptyView()
-            }
         }
-        if (isLoading.value!! || isMatchRecordLoading.value!! || isDetailLoading.value!!) {
-            LoadingBar()
-        }
+    }
+    if (pagingLoading) {
+        CircleLoadingBar()
+    }
+    if (isLoading) {
+        LoadingBar()
     }
 }
 
@@ -141,7 +154,7 @@ fun MatchListCard(accessId: String, item: MatchTypeData, index: Int, selected: B
             .padding(15.dp)
             .clickable(interactionSource = MutableInteractionSource(), indication = null) {
                 onClick.invoke(index)
-                viewModel.getMatchRecord(accessId, item.matchType)
+                viewModel.getMatchRecordPagingData(accessId, item.matchType)
             }, contentAlignment = Alignment.Center
 
     ) {
@@ -149,14 +162,126 @@ fun MatchListCard(accessId: String, item: MatchTypeData, index: Int, selected: B
     }
 }
 
+//@Composable
+//fun DisplayCard(list: () -> List<DetailMapData>, data: DisplayMatchData, index: Int, isExpanded: Boolean, viewModel: MatchViewModel = hiltViewModel(), onClick: () -> Unit) {
+//    Box(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .clip(RoundedCornerShape(10.dp))
+//            .background(
+//                color = when (data.result) {
+//                    "승" -> colorResource(id = R.color.win).copy(alpha = 0.5f)
+//                    "패" -> colorResource(id = R.color.defeat).copy(alpha = 0.5f)
+//                    else -> Color.DarkGray.copy(
+//                        alpha = 0.5f
+//                    )
+//                }
+//            )
+//            .border(1.dp, color = Color.White)
+//    ) {
+//        Column(
+//            modifier = Modifier.fillMaxSize()
+//        ) {
+//            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+//                Text(text = data.date.replace("T", "  "), fontSize = 15.sp)
+//            }
+//            Divider(color = Color.LightGray, thickness = 1.dp)
+//            Row(
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .fillMaxHeight(0.3f)
+//                    .padding(5.dp), verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxHeight()
+//                        .fillMaxWidth(0.333f), contentAlignment = Alignment.Center
+//                ) {
+//                    Text(text = data.nickname1, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxHeight()
+//                        .fillMaxWidth(0.5f), contentAlignment = Alignment.Center
+//                ) {
+//                    Text(text = "vs", fontSize = 20.sp)
+//                }
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxHeight()
+//                        .fillMaxWidth(), contentAlignment = Alignment.Center
+//                ) {
+//                    Text(text = data.nickname2, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+//                }
+//            }
+//            Row(
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .fillMaxHeight(0.6f)
+//                    .padding(5.dp), verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxHeight()
+//                        .fillMaxWidth(0.333f), contentAlignment = Alignment.Center
+//                ) {
+//                    Text(text = data.goal1, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxHeight()
+//                        .fillMaxWidth(0.5f), contentAlignment = Alignment.Center
+//                ) {
+//                    Text(text = ":", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxHeight()
+//                        .fillMaxWidth(), contentAlignment = Alignment.Center
+//                ) {
+//                    Text(text = data.goal2, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+//                }
+//            }
+//            Divider(color = Color.DarkGray, thickness = 1.dp)
+//            Box(
+//                modifier = Modifier
+//                    .wrapContentHeight()
+//                    .fillMaxWidth()
+//                    .animateContentSize()
+//            ) {
+//                if (isExpanded) {
+//                    DetailView { list() }
+//                }
+//            }
+//            Row(
+//                modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .clickable(interactionSource = MutableInteractionSource(), indication = null) {
+//                            onClick.invoke()
+//                        }, contentAlignment = Alignment.Center
+//                ) {
+//                    Image(
+//                        modifier = Modifier
+//                            .size(30.dp)
+//                            .alpha(0.5f), painter = painterResource(id = if (isExpanded) R.drawable.ic_contract else R.drawable.ic_expand), contentDescription = ""
+//                    )
+//                }
+//            }
+//        }
+//    }
+//}
+
 @Composable
-fun DisplayCard(list: () -> List<DetailMapData>, data: DisplayMatchData, index: Int, isExpanded: Boolean, viewModel: MatchViewModel = hiltViewModel(), onClick: () -> Unit) {
+fun DisplayCard(list: () -> MatchDetailData, index: Int, isExpanded: Boolean, viewModel: MatchViewModel = hiltViewModel(), onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .clip(RoundedCornerShape(10.dp))
             .background(
-                color = when (data.result) {
+                color = when (list().result1) {
                     "승" -> colorResource(id = R.color.win).copy(alpha = 0.5f)
                     "패" -> colorResource(id = R.color.defeat).copy(alpha = 0.5f)
                     else -> Color.DarkGray.copy(
@@ -170,7 +295,7 @@ fun DisplayCard(list: () -> List<DetailMapData>, data: DisplayMatchData, index: 
             modifier = Modifier.fillMaxSize()
         ) {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text(text = data.date.replace("T", "  "), fontSize = 15.sp)
+                Text(text = list().date.replace("T", "  "), fontSize = 15.sp)
             }
             Divider(color = Color.LightGray, thickness = 1.dp)
             Row(
@@ -184,7 +309,7 @@ fun DisplayCard(list: () -> List<DetailMapData>, data: DisplayMatchData, index: 
                         .fillMaxHeight()
                         .fillMaxWidth(0.333f), contentAlignment = Alignment.Center
                 ) {
-                    Text(text = data.nickname1, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Text(text = list().nickname1, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(
                     modifier = Modifier
@@ -198,7 +323,7 @@ fun DisplayCard(list: () -> List<DetailMapData>, data: DisplayMatchData, index: 
                         .fillMaxHeight()
                         .fillMaxWidth(), contentAlignment = Alignment.Center
                 ) {
-                    Text(text = data.nickname2, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Text(text = list().nickname2, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Row(
@@ -212,7 +337,7 @@ fun DisplayCard(list: () -> List<DetailMapData>, data: DisplayMatchData, index: 
                         .fillMaxHeight()
                         .fillMaxWidth(0.333f), contentAlignment = Alignment.Center
                 ) {
-                    Text(text = data.goal1, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    Text(text = list().displayGoal1, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(
                     modifier = Modifier
@@ -226,7 +351,7 @@ fun DisplayCard(list: () -> List<DetailMapData>, data: DisplayMatchData, index: 
                         .fillMaxHeight()
                         .fillMaxWidth(), contentAlignment = Alignment.Center
                 ) {
-                    Text(text = data.goal2, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    Text(text = list().displayGoal2, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Divider(color = Color.DarkGray, thickness = 1.dp)
@@ -262,16 +387,8 @@ fun DisplayCard(list: () -> List<DetailMapData>, data: DisplayMatchData, index: 
 }
 
 @Composable
-fun EmptyView() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "조회된 기록이 없습니다", fontSize = 15.sp)
-    }
-}
-
-@Composable
 fun DetailView(
-    viewModel: MatchViewModel = hiltViewModel(),
-    data: () -> List<DetailMapData>
+    viewModel: MatchViewModel = hiltViewModel(), data: () -> MatchDetailData
 ) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(
@@ -281,169 +398,355 @@ fun DetailView(
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                    Text(text = data.invoke()[0].result, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    Text(text = data.invoke().result1, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
                     Text(text = "결과", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                    Text(text = data.invoke()[1].result, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    Text(text = data.invoke().result2, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                    Text(text = data.invoke()[0].goal, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = data.invoke().goal1, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
                     Text(text = "골", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                    Text(text = data.invoke()[1].goal, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = data.invoke().goal2, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                    Text(text = data.invoke()[0].totalShoot, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = data.invoke().totalShoot1, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
                     Text(text = "전체슛", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                    Text(text = data.invoke()[1].totalShoot, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = data.invoke().totalShoot2, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                    Text(text = data.invoke()[0].validShoot, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = data.invoke().validShoot1, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
                     Text(text = "유효슛", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                    Text(text = data.invoke()[1].validShoot, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = data.invoke().validShoot2, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                    Text(text = "${data.invoke()[0].shootRating} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "${data.invoke().shootRating1} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
                     Text(text = "슈팅성공률", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                    Text(text = "${data.invoke()[1].shootRating} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "${data.invoke().shootRating2} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                    Text(text = "${data.invoke()[0].validPass} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "${data.invoke().validPass1} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
                     Text(text = "패스성공률", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                    Text(text = "${data.invoke()[1].validPass} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "${data.invoke().validPass2} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                    Text(text = "${data.invoke()[0].validDefence} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "${data.invoke().validDefence1} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
                     Text(text = "수비성공률", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                    Text(text = "${data.invoke()[1].validDefence} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "${data.invoke().validDefence2} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                    Text(text = "${data.invoke()[0].validTackle} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "${data.invoke().validTackle1} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
                     Text(text = "태클성공률", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                    Text(text = "${data.invoke()[1].validTackle} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "${data.invoke().validTackle2} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                    Text(text = "${data.invoke()[0].possession} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "${data.invoke().possession1} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
                     Text(text = "점유율", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                    Text(text = "${data.invoke()[1].possession} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "${data.invoke().possession2} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                    Text(text = data.invoke()[0].offsideCount, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = data.invoke().offsideCount1, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
                     Text(text = "옵사이드", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                    Text(text = data.invoke()[1].offsideCount, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = data.invoke().offsideCount2, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                    Text(text = data.invoke()[0].yellowCards, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = data.invoke().yellowCards1, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
                     Text(text = "경고", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                    Text(text = data.invoke()[1].yellowCards, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = data.invoke().yellowCards2, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                    Text(text = data.invoke()[0].redCards, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = data.invoke().redCards1, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
                     Text(text = "퇴장", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                    Text(text = data.invoke()[1].redCards, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = data.invoke().redCards2, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                    Text(text = data.invoke()[0].foul, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = data.invoke().foul1, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
                     Text(text = "파울", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                    Text(text = data.invoke()[1].foul, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = data.invoke().foul2, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                    Text(text = data.invoke()[0].injury, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = data.invoke().injury1, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
                     Text(text = "부상", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                    Text(text = data.invoke()[1].injury, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = data.invoke().injury2, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                    Text(text = "${data.invoke()[0].averageRating} / 5.0", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "${data.invoke().averageRating1} / 5.0", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
                     Text(text = "경기평점", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                    Text(text = "${data.invoke()[1].averageRating} / 5.0", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "${data.invoke().averageRating2} / 5.0", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
     }
 }
+
+@Composable
+fun EmptyView() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(text = "조회된 기록이 없습니다", fontSize = 15.sp)
+    }
+}
+
+//@Composable
+//fun DetailView(
+//    viewModel: MatchViewModel = hiltViewModel(), data: () -> List<DetailMapData>
+//) {
+//    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+//        Column(
+//            modifier = Modifier
+//                .fillMaxSize(0.95f)
+//                .padding(5.dp), horizontalAlignment = Alignment.CenterHorizontally
+//        ) {
+//            Row(modifier = Modifier.fillMaxWidth()) {
+//                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+//                    Text(text = data.invoke()[0].result, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+//                    Text(text = "결과", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+//                    Text(text = data.invoke()[1].result, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+//                }
+//            }
+//            Row(modifier = Modifier.fillMaxWidth()) {
+//                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+//                    Text(text = data.invoke()[0].goal, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+//                    Text(text = "골", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+//                    Text(text = data.invoke()[1].goal, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//            }
+//            Row(modifier = Modifier.fillMaxWidth()) {
+//                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+//                    Text(text = data.invoke()[0].totalShoot, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+//                    Text(text = "전체슛", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+//                    Text(text = data.invoke()[1].totalShoot, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//            }
+//            Row(modifier = Modifier.fillMaxWidth()) {
+//                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+//                    Text(text = data.invoke()[0].validShoot, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+//                    Text(text = "유효슛", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+//                    Text(text = data.invoke()[1].validShoot, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//            }
+//            Row(modifier = Modifier.fillMaxWidth()) {
+//                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+//                    Text(text = "${data.invoke()[0].shootRating} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+//                    Text(text = "슈팅성공률", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+//                    Text(text = "${data.invoke()[1].shootRating} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//            }
+//            Row(modifier = Modifier.fillMaxWidth()) {
+//                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+//                    Text(text = "${data.invoke()[0].validPass} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+//                    Text(text = "패스성공률", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+//                    Text(text = "${data.invoke()[1].validPass} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//            }
+//            Row(modifier = Modifier.fillMaxWidth()) {
+//                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+//                    Text(text = "${data.invoke()[0].validDefence} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+//                    Text(text = "수비성공률", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+//                    Text(text = "${data.invoke()[1].validDefence} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//            }
+//            Row(modifier = Modifier.fillMaxWidth()) {
+//                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+//                    Text(text = "${data.invoke()[0].validTackle} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+//                    Text(text = "태클성공률", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+//                    Text(text = "${data.invoke()[1].validTackle} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//            }
+//            Row(modifier = Modifier.fillMaxWidth()) {
+//                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+//                    Text(text = "${data.invoke()[0].possession} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+//                    Text(text = "점유율", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+//                    Text(text = "${data.invoke()[1].possession} %", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//            }
+//            Row(modifier = Modifier.fillMaxWidth()) {
+//                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+//                    Text(text = data.invoke()[0].offsideCount, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+//                    Text(text = "옵사이드", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+//                    Text(text = data.invoke()[1].offsideCount, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//            }
+//            Row(modifier = Modifier.fillMaxWidth()) {
+//                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+//                    Text(text = data.invoke()[0].yellowCards, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+//                    Text(text = "경고", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+//                    Text(text = data.invoke()[1].yellowCards, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//            }
+//            Row(modifier = Modifier.fillMaxWidth()) {
+//                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+//                    Text(text = data.invoke()[0].redCards, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+//                    Text(text = "퇴장", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+//                    Text(text = data.invoke()[1].redCards, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//            }
+//            Row(modifier = Modifier.fillMaxWidth()) {
+//                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+//                    Text(text = data.invoke()[0].foul, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+//                    Text(text = "파울", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+//                    Text(text = data.invoke()[1].foul, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//            }
+//            Row(modifier = Modifier.fillMaxWidth()) {
+//                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+//                    Text(text = data.invoke()[0].injury, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+//                    Text(text = "부상", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+//                    Text(text = data.invoke()[1].injury, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//            }
+//            Row(modifier = Modifier.fillMaxWidth()) {
+//                Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
+//                    Text(text = "${data.invoke()[0].averageRating} / 5.0", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
+//                    Text(text = "경기평점", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+//                }
+//                Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
+//                    Text(text = "${data.invoke()[1].averageRating} / 5.0", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+//                }
+//            }
+//        }
+//    }
+//}

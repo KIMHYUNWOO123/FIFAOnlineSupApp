@@ -40,7 +40,6 @@ class TransactionViewModel @Inject constructor(
                     val seasonIdData = metaDataUseCase.getSeasonId()
                     val spIdData = metaDataUseCase.getSpId()
                     _transactionData.postValue(mapper.transactionMap(it, seasonIdData, spIdData))
-                    Log.d("###", "getTransactionRecord: ${mapper.transactionMap(it, seasonIdData, spIdData)}")
                 }
             }
         }.invokeOnCompletion {

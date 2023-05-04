@@ -1,6 +1,8 @@
 package com.example.domain
 
+import androidx.paging.PagingData
 import com.example.domain.entity.*
+import kotlinx.coroutines.flow.Flow
 
 interface Repository {
     suspend fun getUserData(nickname: String): UserEntity
@@ -20,4 +22,6 @@ interface Repository {
     suspend fun getSeasonIdData(): List<SeasonIdEntity>
 
     suspend fun getSpPositionData(): List<SpPositionEntity>
+
+    suspend fun getMatchRecordPagingData(accessId: String, matchType: Int): Flow<PagingData<MatchDetailData>>
 }
