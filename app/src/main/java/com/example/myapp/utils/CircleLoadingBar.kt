@@ -17,7 +17,7 @@ fun CircleLoadingBar() {
         CircularProgressIndicator(
             modifier = Modifier
                 .fillMaxSize(0.1f),
-            color = colorResource(id = R.color.app_color),
+            color = colorResource(id = R.color.defeat),
             strokeWidth = 2.dp
         )
     }

@@ -59,11 +59,9 @@ class RepositoryImpl @Inject constructor(
         return Pager(
             config = PagingConfig(
                 pageSize = 30,
-                maxSize = 30 * 3
+                initialLoadSize = 30,
             ),
             pagingSourceFactory = pagingFactory
         ).flow
     }
-
-
 }

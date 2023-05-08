@@ -16,6 +16,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import javax.inject.Inject
 
 @HiltViewModel
@@ -136,11 +137,10 @@ class MatchViewModel @Inject constructor(
         myJob?.cancel()
         myJob = viewModelScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, t ->
             error.postValue(t.message)
-            isMatchRecordLoading.postValue(false)
         }) {
             matchUseCase.getMatchRecordPagingData(accessId, matchType)
                 .cachedIn(viewModelScope)
-                .collect {
+                .collectLatest {
                     _matchRecordPagingData.value = it
                 }
         }
