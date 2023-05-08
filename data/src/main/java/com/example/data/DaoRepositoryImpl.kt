@@ -36,6 +36,11 @@ class DaoRepositoryImpl @Inject constructor(
         return db.spIdDao().getSpId()
     }
 
+    override suspend fun searchSpId(name: String): List<SpIdData> {
+        return db.spIdDao().searchSpId(name)
+    }
+
+
     override suspend fun insertSeasonId(list: List<SeasonIdData>) {
         db.seasonIdDao().insertSeasonId(list)
     }

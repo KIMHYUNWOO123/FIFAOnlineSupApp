@@ -1,6 +1,5 @@
 package com.example.myapp.ui.match
 
-import android.util.Log
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image

@@ -108,6 +108,8 @@ class Mapper {
                 averageRating2 = average2.toString(),
                 totalShoot1 = totalShoot1.toString(),
                 totalShoot2 = totalShoot2.toString(),
+                validShoot1 = validShoot1.toString(),
+                validShoot2 = validShoot2.toString(),
                 shootRating1 = shootRating1.toString(),
                 shootRating2 = shootRating2.toString(),
                 goal1 = goal1.toString(),
@@ -117,7 +119,7 @@ class Mapper {
                 validDefence1 = validDefence1.toString(),
                 validDefence2 = validDefence2.toString(),
                 validTackle1 = validTackle1.toString(),
-                validShoot2 = validTackle2.toString(),
+                validTackle2 = validTackle2.toString(),
                 mvpPlayerSpId1 = "0",
                 mvpPlayerSpId2 = "0"
             )
@@ -176,6 +178,7 @@ class Mapper {
                 offsideCount1 = offsideCount1.toString(),
                 averageRating1 = average1.toString(),
                 totalShoot1 = totalShoot1.toString(),
+                validShoot1 = validShoot1.toString(),
                 shootRating1 = shootRating1.toString(),
                 goal1 = goal1.toString(),
                 validPass1 = validPass1.toString(),

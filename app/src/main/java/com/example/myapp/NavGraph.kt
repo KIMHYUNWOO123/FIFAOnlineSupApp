@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navOptions
 import com.example.myapp.ui.main.Main
 import com.example.myapp.ui.match.Match
+import com.example.myapp.ui.ranker.Ranker
 import com.example.myapp.ui.splash.Splash
 import com.example.myapp.ui.transaction.Transaction
 import com.example.myapp.ui.user.User
@@ -21,6 +22,7 @@ object Screen {
     const val USER = "USER"
     const val MATCH = "match"
     const val TRANSACTION = "transaction"
+    const val RANKER = "ranker"
 }
 
 @Composable
@@ -31,7 +33,7 @@ fun navGraph(navController: NavHostController) {
             Splash(moveMain = action.moveMain)
         }
         composable(route = Screen.MAIN) {
-            Main(moveUser = action.moveUser)
+            Main(moveUser = action.moveUser, moveRanker = action.moveRanker)
         }
         composable(route = Screen.USER) {
             User(onMatchView = action.moveMatch, onTransactionView = action.moveTransaction)
@@ -42,13 +44,16 @@ fun navGraph(navController: NavHostController) {
         composable(route = "${Screen.TRANSACTION}/{accessId}") { backStackEntry ->
             Transaction(accessId = backStackEntry.arguments?.getString("accessId") ?: "")
         }
+        composable(route = Screen.RANKER) {
+            Ranker()
+        }
     }
 }
 
 class MoveAction(navController: NavController) {
 
     val moveMain: () -> Unit = {
-        navController.navigate(route = Screen.MAIN, navOptions = navOptions { popUpTo(Screen.MAIN) })
+        navController.navigate(route = Screen.MAIN, navOptions = navOptions { popUpTo(Screen.MAIN_ROUTE) })
     }
 
     val moveUser: () -> Unit = {
@@ -59,6 +64,9 @@ class MoveAction(navController: NavController) {
     }
     val moveTransaction: (String) -> Unit = {
         navController.navigate(route = "${Screen.TRANSACTION}/$it", navOptions = navOptions { popUpTo(Screen.USER) })
+    }
+    val moveRanker: () -> Unit = {
+        navController.navigate(route = Screen.RANKER, navOptions = navOptions { popUpTo(Screen.MAIN) })
     }
 
 }

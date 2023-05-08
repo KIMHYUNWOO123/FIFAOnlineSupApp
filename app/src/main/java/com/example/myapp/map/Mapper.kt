@@ -152,4 +152,19 @@ class Mapper {
         }
         return list.toList()
     }
+
+    fun searchRankerDataMap(spIdData: List<SpIdData>, seasonIdData: List<SeasonIdData>): List<SearchRankerData> {
+        val list = mutableListOf<SearchRankerData>()
+        for ((i, item) in spIdData.withIndex()) {
+            val image = seasonIdData.filter { it.seasonId == item.id.toString().substring(0 until 3).toInt() }.map { it.seasonImg }
+            list.add(
+                i, SearchRankerData(
+                    name = item.name,
+                    image = image.joinToString(),
+                    id = item.id
+                )
+            )
+        }
+        return list.toList()
+    }
 }
