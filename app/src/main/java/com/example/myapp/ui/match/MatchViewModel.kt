@@ -141,6 +141,7 @@ class MatchViewModel @Inject constructor(
             matchUseCase.getMatchRecordPagingData(accessId, matchType)
                 .cachedIn(viewModelScope)
                 .collectLatest {
+                    Log.d("###", "getMatchRecordPagingData:$it ")
                     _matchRecordPagingData.value = it
                 }
         }
