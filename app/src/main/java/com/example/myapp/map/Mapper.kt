@@ -167,4 +167,49 @@ class Mapper {
         }
         return list.toList()
     }
+
+    fun toJsonPlayer(spId: Int, positionList: List<SpPositionData>): String {
+        val list = mutableListOf<String>()
+        for ((i, item) in positionList.withIndex()) {
+            list.add(
+                i, PlayerData(
+                    id = spId,
+                    po = item.spPosition
+                ).toJson()
+            )
+        }
+        return list.toString()
+    }
+
+    fun getRankerPlayerDataMap(rankerPlayerEntity: RankerPlayerEntity, spPositionData: List<SpPositionData>): RankerPlayerData {
+        val position = spPositionData.filter { it.spPosition == rankerPlayerEntity.spPosition }.map { it.desc }
+        val date = rankerPlayerEntity.createDate.replace("T", " ")
+        val validShootPercentage = if (rankerPlayerEntity.status.goal != 0f) ((rankerPlayerEntity.status.goal / rankerPlayerEntity.status.shoot) * 100.0f).roundToInt() else 0
+        val validPassPercentage = if (rankerPlayerEntity.status.passSuccess != 0f) ((rankerPlayerEntity.status.passSuccess / rankerPlayerEntity.status.passTry) * 100.0f).roundToInt() else 0
+        val validDribblePercentage =
+            if (rankerPlayerEntity.status.dribbleSuccess != 0f) ((rankerPlayerEntity.status.dribbleSuccess / rankerPlayerEntity.status.dribbleTry) * 100.0f).roundToInt() else 0
+        return RankerPlayerData(
+            spId = rankerPlayerEntity.spId,
+            spPositionInt = rankerPlayerEntity.spPosition,
+            spPosition = position.joinToString(),
+            status = RankerPlayerStatusData(
+                shoot = String.format("%.2f", rankerPlayerEntity.status.shoot).toFloat(),
+                effectiveShoot = String.format("%.2f", rankerPlayerEntity.status.effectiveShoot).toFloat(),
+                assist = String.format("%.2f", rankerPlayerEntity.status.assist).toFloat(),
+                goal = String.format("%.2f", rankerPlayerEntity.status.goal).toFloat(),
+                dribble = String.format("%.2f", rankerPlayerEntity.status.dribble).toFloat(),
+                dribbleTry = String.format("%.2f", rankerPlayerEntity.status.dribbleTry).toFloat(),
+                dribbleSuccess = String.format("%.2f", rankerPlayerEntity.status.dribbleSuccess).toFloat(),
+                passTry = String.format("%.2f", rankerPlayerEntity.status.passTry).toFloat(),
+                passSuccess = String.format("%.2f", rankerPlayerEntity.status.passSuccess).toFloat(),
+                block = String.format("%.2f", rankerPlayerEntity.status.block).toFloat(),
+                tackle = String.format("%.2f", rankerPlayerEntity.status.tackle).toFloat(),
+                matchCount = rankerPlayerEntity.status.matchCount,
+                validDribblePercentage = validDribblePercentage,
+                validPassPercentage = validPassPercentage,
+                validShootPercentage = validShootPercentage
+            ),
+            createDate = date,
+        )
+    }
 }

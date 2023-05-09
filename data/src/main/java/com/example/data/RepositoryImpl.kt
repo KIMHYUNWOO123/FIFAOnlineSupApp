@@ -11,7 +11,7 @@ import javax.inject.Named
 
 class RepositoryImpl @Inject constructor(
     @Named("api") private val apiService: ApiService,
-    @Named("meta") private val metaApiService: MetaApiService
+    @Named("meta") private val metaApiService: MetaApiService,
 ) : Repository {
     override suspend fun getUserData(nickname: String): UserEntity {
         return apiService.getUser(nickname = nickname)
@@ -31,6 +31,10 @@ class RepositoryImpl @Inject constructor(
 
     override suspend fun getTransactionRecord(accessId: String, tradeType: String): List<TransactionRecordEntity> {
         return apiService.getTransactionRecord(accessId = accessId, tradeType = tradeType)
+    }
+
+    override suspend fun getRankerPlayerData(matchType: Int, player: String): List<RankerPlayerEntity> {
+        return apiService.getRankerUsedPlayer(matchType, player)
     }
 
     // Meta

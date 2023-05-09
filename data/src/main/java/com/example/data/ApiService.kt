@@ -1,9 +1,6 @@
 package com.example.data
 
-import com.example.domain.entity.BestRankEntity
-import com.example.domain.entity.DetailMatchRecordEntity
-import com.example.domain.entity.TransactionRecordEntity
-import com.example.domain.entity.UserEntity
+import com.example.domain.entity.*
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -12,12 +9,12 @@ interface ApiService {
 
     @GET("users/")
     suspend fun getUser(
-        @Query("nickname") nickname: String
+        @Query("nickname") nickname: String,
     ): UserEntity
 
     @GET("users/{accessid}/maxdivision")
     suspend fun getBestRank(
-        @Path("accessid", encoded = true) accessId: String
+        @Path("accessid", encoded = true) accessId: String,
     ): List<BestRankEntity>
 
     @GET("users/{accessid}/matches")
@@ -28,13 +25,13 @@ interface ApiService {
 
     @GET("matches/{matchid}")
     suspend fun getDetailMatchRecord(
-        @Path("matchid", encoded = true) matchId: String
+        @Path("matchid", encoded = true) matchId: String,
     ): DetailMatchRecordEntity
 
     @GET("users/{accessid}/markets")
     suspend fun getTransactionRecord(
         @Path("accessid", encoded = true) accessId: String,
-        @Query("tradetype") tradeType: String
+        @Query("tradetype") tradeType: String,
     ): List<TransactionRecordEntity>
 
     @GET("users/{accessid}/matches")
@@ -42,6 +39,12 @@ interface ApiService {
         @Path("accessid", encoded = true) accessId: String,
         @Query("matchtype") matchType: Int,
         @Query("offset") offset: Int,
-        @Query("limit") limit: Int
+        @Query("limit") limit: Int,
     ): List<String>
+
+    @GET("rankers/status")
+    suspend fun getRankerUsedPlayer(
+        @Query("matchtype") matchType: Int,
+        @Query("players") player: String,
+    ): List<RankerPlayerEntity>
 }

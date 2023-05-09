@@ -13,6 +13,8 @@ interface Repository {
 
     suspend fun getTransactionRecord(accessId: String, tradeType: String): List<TransactionRecordEntity>
 
+    suspend fun getRankerPlayerData(matchType: Int, player: String): List<RankerPlayerEntity>
+
     // Meta
     suspend fun getMatchData(): List<MatchTypeEntity>
     suspend fun getDivisionData(): List<DivisionEntity>
