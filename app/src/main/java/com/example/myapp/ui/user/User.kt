@@ -1,9 +1,9 @@
 package com.example.myapp.ui.user
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -17,14 +17,14 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -90,6 +90,7 @@ fun User(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .clickable(interactionSource = MutableInteractionSource(), indication = null) { focusManager.clearFocus() }
                     .background(color = colorResource(id = R.color.app_color1)), horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.fillMaxHeight(0.05f))
@@ -129,7 +130,7 @@ fun User(
 
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(0.8f)
+                            .fillMaxWidth(0.8f).padding(vertical = 5.dp)
                             .clickable(interactionSource = interactionSource, indication = null) {
                                 viewModel.getUserData(text)
                                 focusManager.clearFocus()
@@ -141,91 +142,138 @@ fun User(
                     )
                     Text(text = "검색하기", textAlign = TextAlign.Center, color = if (isClick) Color.White else Color.Black, fontSize = 15.sp)
                 }
-                if (accessId!!.isNotBlank()) {
-                    Row(
+                if (accessId!!.isNotBlank() && !isLoading!!) {
+                    Spacer(modifier = Modifier.fillMaxHeight(0.05f))
+                    Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp)
+                            .padding(15.dp)
+                            .clip(RoundedCornerShape(15.dp))
+                            .background(colorResource(id = R.color.app_color6))
                     ) {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(0.4f), contentAlignment = Alignment.Center
-                        ) {
-                            Image(modifier = Modifier.size(30.dp), painter = painterResource(id = R.drawable.ic_nickname), contentDescription = "")
-                        }
-                        Box(
-                            modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = name.toString(), fontSize = 25.sp, fontStyle = FontStyle.Italic)
-                        }
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(0.4f), contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "LV", fontSize = 25.sp, color = Color.Blue)
-                        }
-                        Box(
-                            modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = level.toString(), fontSize = 25.sp)
-                        }
-                    }
-                    if (!bestRankList.isNullOrEmpty() && isLoading == false) {
-                        Column(modifier = Modifier.wrapContentHeight()) {
+                        Column {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 10.dp, start = 10.dp, end = 10.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(0.4f), contentAlignment = Alignment.Center
+                                ) {
+                                    Text(text = "닉네임", fontSize = 25.sp, color = colorResource(id = R.color.app_color1))
+                                }
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center
+                                ) {
+                                    Text(text = name.toString(), fontSize = 25.sp, color = colorResource(id = R.color.app_color1))
+                                }
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 10.dp, start = 10.dp, end = 10.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(0.4f), contentAlignment = Alignment.Center
+                                ) {
+                                    Text(text = "LV", fontSize = 25.sp, color = colorResource(id = R.color.app_color1))
+                                }
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center
+                                ) {
+                                    Text(text = level.toString(), fontSize = 25.sp, color = colorResource(id = R.color.app_color1))
+                                }
+                            }
                             Box(
                                 modifier = Modifier
-                                    .wrapContentHeight()
-                                    .fillMaxWidth(), contentAlignment = Alignment.Center
+                                    .fillMaxWidth()
+                                    .height(80.dp), contentAlignment = Alignment.TopCenter
                             ) {
-                                Text(text = "최고기록", fontSize = 20.sp)
+                                Canvas(
+                                    modifier = Modifier
+                                        .size(80.dp)
+                                ) {
+                                    drawArc(
+                                        topLeft = Offset(0f, size.height / 2), color = Color.White,
+                                        size = Size(size.width, size.height), startAngle = -180f, sweepAngle = 180f, useCenter = false,
+                                    )
+                                }
+                                Column {
+                                    Spacer(modifier = Modifier.fillMaxHeight(0.6f))
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize(), contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(text = "최고기록", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                                    }
+                                }
                             }
-                            BestRankView { bestRankList!! }
-                        }
-                        val matchInteractionSource = remember {
-                            MutableInteractionSource()
-                        }
-                        val matchIsPress by matchInteractionSource.collectIsPressedAsState()
-                        Box(modifier = Modifier
-                            .fillMaxWidth(0.8f)
-                            .clickable(interactionSource = matchInteractionSource, indication = null) {
-                                onMatchView(accessId.toString())
+                            Box(
+                                modifier = Modifier
+                                    .padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
+                                    .clip(RoundedCornerShape(15.dp))
+                                    .background(Color.White)
+                            ) {
+                                BestRankView { bestRankList!! }
                             }
-                            .padding(top = 30.dp)
-                            .wrapContentHeight()
-                            .clip(RectangleShape)
-                            .border(width = 1.dp, color = colorResource(id = R.color.app_color))
-                            .background(if (matchIsPress) colorResource(id = R.color.app_color) else Color.White), contentAlignment = Alignment.Center) {
-                            Text(modifier = Modifier.padding(vertical = 15.dp), text = "경기 기록", fontSize = 30.sp, color = if (matchIsPress) Color.White else Color.Black)
                         }
-                        val transactionInteractionSource = remember {
-                            MutableInteractionSource()
-                        }
-                        val transactionIsPress by transactionInteractionSource.collectIsPressedAsState()
-                        Box(modifier = Modifier
-                            .fillMaxWidth(0.8f)
-                            .clickable(interactionSource = transactionInteractionSource, indication = null) {
-                                onTransactionView(accessId.toString())
+                    }
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .padding(top = 15.dp), contentAlignment = Alignment.TopCenter
+                    ) {
+                        Row(modifier = Modifier.fillMaxWidth(0.9f), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                            val matchInteractionSource = remember {
+                                MutableInteractionSource()
                             }
-                            .padding(top = 30.dp)
-                            .wrapContentHeight()
-                            .clip(RectangleShape)
-                            .border(width = 1.dp, color = colorResource(id = R.color.app_color))
-                            .background(if (transactionIsPress) colorResource(id = R.color.app_color) else Color.White), contentAlignment = Alignment.Center) {
-                            Text(modifier = Modifier.padding(vertical = 15.dp), text = "거래 내역", fontSize = 30.sp, color = if (transactionIsPress) Color.White else Color.Black)
+                            val matchIsPress by matchInteractionSource.collectIsPressedAsState()
+                            Box(modifier = Modifier
+                                .clickable(interactionSource = matchInteractionSource, indication = null) {
+                                    onMatchView(accessId.toString())
+                                }
+                                .wrapContentHeight()
+                                .clip(RoundedCornerShape(25.dp))
+                                .background(if (matchIsPress) colorResource(id = R.color.app_color8) else colorResource(id = R.color.app_color2))
+                                .padding(20.dp), contentAlignment = Alignment.Center) {
+                                Text(
+                                    modifier = Modifier.padding(vertical = 15.dp),
+                                    text = "경기 기록",
+                                    fontSize = 25.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = if (matchIsPress) colorResource(id = R.color.app_color2) else colorResource(id = R.color.app_color8)
+                                )
+                            }
+                            Spacer(modifier = Modifier.fillMaxWidth(0.1f))
+                            val transactionInteractionSource = remember {
+                                MutableInteractionSource()
+                            }
+                            val transactionIsPress by transactionInteractionSource.collectIsPressedAsState()
+                            Box(modifier = Modifier
+                                .clickable(interactionSource = transactionInteractionSource, indication = null) {
+                                    onTransactionView(accessId.toString())
+                                }
+                                .wrapContentHeight()
+                                .clip(RoundedCornerShape(25.dp))
+                                .background(if (transactionIsPress) colorResource(id = R.color.app_color8) else colorResource(id = R.color.app_color2))
+                                .padding(20.dp), contentAlignment = Alignment.Center) {
+                                Text(
+                                    modifier = Modifier.padding(vertical = 15.dp),
+                                    text = "거래 내역",
+                                    fontSize = 25.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = if (transactionIsPress) colorResource(id = R.color.app_color2) else colorResource(id = R.color.app_color8)
+                                )
+                            }
                         }
                     }
                 }
-                if (error!!.isNotBlank()) {
-                    EmptyView()
-                }
             }
-            if (isLoading!!) {
-                LoadingBar()
-            }
+        }
+        if (error!!.isNotBlank()) {
+            EmptyView()
+        }
+        if (isLoading!!) {
+            LoadingBar()
         }
     }
 }
@@ -242,12 +290,7 @@ fun BestRankView(list: () -> List<BestRankList>) {
         LazyColumn {
             items(list()) { item ->
                 BestRankListCard(item = item)
-                Spacer(modifier = Modifier.fillMaxHeight(0.1f))
-                Divider(
-                    color = Color.LightGray, modifier = Modifier
-                        .fillMaxHeight(0.05f)
-                        .fillMaxWidth()
-                )
+                Spacer(modifier = Modifier.fillParentMaxHeight(0.01f))
             }
         }
     }
@@ -255,15 +298,21 @@ fun BestRankView(list: () -> List<BestRankList>) {
 
 @Composable
 fun BestRankListCard(item: BestRankList) {
-    Row(
+    Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(5.dp), horizontalArrangement = Arrangement.SpaceBetween
+            .clip(RoundedCornerShape(30.dp))
+            .background(colorResource(id = R.color.app_color3)), contentAlignment = Alignment.Center
     ) {
-        Text(text = item.matchType, fontSize = 15.sp)
-        Text(text = item.division, fontSize = 15.sp)
-        Text(text = item.date, fontSize = 15.sp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(10.dp), horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = item.matchType, fontSize = 15.sp, color = colorResource(id = R.color.app_color1))
+            Text(text = item.division, fontSize = 15.sp, color = colorResource(id = R.color.app_color1))
+            Text(text = item.date, fontSize = 15.sp, color = colorResource(id = R.color.app_color1))
+        }
     }
 }
 

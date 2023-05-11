@@ -3,7 +3,6 @@ package com.example.myapp.ui.transaction
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -17,7 +16,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -33,7 +31,7 @@ import com.example.myapp.utils.LoadingBar
 @Composable
 fun Transaction(
     viewModel: TransactionViewModel = hiltViewModel(),
-    accessId: String
+    accessId: String,
 ) {
     var isBuy by remember {
         mutableStateOf(true)
@@ -44,64 +42,71 @@ fun Transaction(
     val transactionData by viewModel.transactionData.observeAsState()
     val isLoading by viewModel.isLoading.observeAsState()
     val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(15.dp), contentAlignment = Alignment.TopStart
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_back_24),
-                modifier = Modifier
-                    .size(30.dp)
-                    .clickable(
-                        interactionSource = MutableInteractionSource(),
-                        indication = null
-                    ) { backPressedDispatcher?.onBackPressed() },
-                contentDescription = "뒤로가기",
-                contentScale = ContentScale.Crop
-            )
-        }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(id = R.color.app_color1)), contentAlignment = Alignment.Center
+    ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(15.dp), horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
+            Row(
                 modifier = Modifier
-                    .wrapContentSize(), contentAlignment = Alignment.TopCenter
+                    .fillMaxWidth()
+                    .background(colorResource(id = R.color.app_color2))
             ) {
-                Text(text = "거래 내역", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Box(
+                    modifier = Modifier.padding(10.dp), contentAlignment = Alignment.TopStart
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_back_new), modifier = Modifier
+                            .size(30.dp)
+                            .clickable(
+                                interactionSource = MutableInteractionSource(), indication = null
+                            ) { backPressedDispatcher?.onBackPressed() }, contentDescription = "뒤로가기", contentScale = ContentScale.Crop
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(), contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "거래 내역", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = colorResource(id = R.color.app_color4))
+                    }
+                }
             }
-            Spacer(modifier = Modifier.fillMaxHeight(0.03f))
-            Row(modifier = Modifier.border(1.dp, color = Color.LightGray)) {
+            Row {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.5f)
-                        .background(if (isBuy) colorResource(id = R.color.app_color) else Color.White)
+                        .background(if (isBuy) colorResource(id = R.color.app_color1) else colorResource(id = R.color.app_color8))
                         .padding(15.dp)
                         .clickable(interactionSource = MutableInteractionSource(), indication = null) {
                             isBuy = true
                             viewModel.getTransactionRecord(accessId = accessId, "buy")
                         }, contentAlignment = Alignment.Center
                 ) {
-                    Text("구매내역", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = if (isBuy) Color.White else colorResource(id = R.color.app_color))
+                    Text("구매내역", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = if (isBuy) colorResource(id = R.color.app_color8) else colorResource(id = R.color.app_color1))
                 }
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(1f)
-                        .background(if (!isBuy) colorResource(id = R.color.app_color) else Color.White)
+                        .background(if (!isBuy) colorResource(id = R.color.app_color1) else colorResource(id = R.color.app_color8))
                         .padding(15.dp)
                         .clickable(interactionSource = MutableInteractionSource(), indication = null) {
                             isBuy = false
                             viewModel.getTransactionRecord(accessId = accessId, "sell")
                         }, contentAlignment = Alignment.Center
                 ) {
-                    Text("판매내역", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = if (!isBuy) Color.White else colorResource(id = R.color.app_color))
+                    Text("판매내역", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = if (!isBuy) colorResource(id = R.color.app_color8) else colorResource(id = R.color.app_color1))
                 }
             }
             if (!isLoading!! && transactionData != null) {
-                LazyColumn {
+                LazyColumn(
+                    modifier = Modifier
+                        .background(colorResource(id = R.color.app_color1))
+                        .fillMaxSize()
+                        .padding(10.dp)
+                ) {
                     items(transactionData!!) {
                         TransactionCard(data = it, isBuy)
                         Divider(thickness = 1.dp, color = colorResource(id = R.color.app_color))
@@ -146,7 +151,7 @@ fun TransactionCard(data: TransactionData, isBuy: Boolean) {
                     modifier = Modifier.size(25.dp)
                 )
                 Spacer(modifier = Modifier.fillMaxWidth(0.01f))
-                Text(text = data.name, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
+                Text(text = data.name, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = colorResource(id = R.color.app_color8))
                 Spacer(modifier = Modifier.fillMaxWidth(0.01f))
                 Box(
                     modifier = Modifier
@@ -164,7 +169,7 @@ fun TransactionCard(data: TransactionData, isBuy: Boolean) {
                         .fillMaxWidth()
                         .padding(end = 5.dp), contentAlignment = Alignment.CenterEnd
                 ) {
-                    Text(text = data.tradeDate, fontSize = 10.sp)
+                    Text(text = data.tradeDate, fontSize = 10.sp, color = colorResource(id = R.color.app_color8))
                 }
                 Spacer(modifier = Modifier.fillMaxHeight(0.05f))
                 Box(

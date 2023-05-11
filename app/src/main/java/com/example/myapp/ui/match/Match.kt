@@ -40,7 +40,7 @@ import com.example.myapp.utils.LoadingBar
 
 @Composable
 fun Match(
-    viewModel: MatchViewModel = hiltViewModel(), accessId: String
+    viewModel: MatchViewModel = hiltViewModel(), accessId: String,
 ) {
     LaunchedEffect(Unit) {
         viewModel.getMatchTypeList()
@@ -83,50 +83,64 @@ fun Match(
         }
     }
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(15.dp), contentAlignment = Alignment.TopStart
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_back_24), modifier = Modifier
-                    .size(30.dp)
-                    .clickable(
-                        interactionSource = MutableInteractionSource(), indication = null
-                    ) { backPressedDispatcher?.onBackPressed() }, contentDescription = "뒤로가기", contentScale = ContentScale.Crop
-            )
-        }
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 10.dp), horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
-                modifier = Modifier.wrapContentSize(), contentAlignment = Alignment.TopCenter
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(colorResource(id = R.color.app_color2))
             ) {
-                Text(text = "경기 기록", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            }
-            if (!matchList.value.isNullOrEmpty()) {
-                MatchTypeRow(accessId = accessId, onLoading = onLoading) {
-                    matchList.value!!
+                Box(
+                    modifier = Modifier.padding(10.dp), contentAlignment = Alignment.TopStart
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_back_new), modifier = Modifier
+                            .size(30.dp)
+                            .clickable(
+                                interactionSource = MutableInteractionSource(), indication = null
+                            ) { backPressedDispatcher?.onBackPressed() }, contentDescription = "뒤로가기", contentScale = ContentScale.Crop
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(), contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "경기 기록", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = colorResource(id = R.color.app_color4))
+                    }
                 }
             }
-            if (!isRefresh) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.95f)
-                        .fillMaxHeight(1f), contentAlignment = Alignment.TopCenter
-                ) {
-                    val clicked = remember { mutableStateListOf<Boolean>(*Array(300) { false }) }
-                    LazyColumn {
-                        itemsIndexed(pagingData) { index, item ->
-                            if (item != null) {
-                                DisplayCard(list = { item }, index = index, isExpanded = clicked[index]) {
-                                    clicked[index] = !clicked[index]
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(colorResource(id = R.color.app_color1)), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (!matchList.value.isNullOrEmpty()) {
+                    MatchTypeRow(accessId = accessId, onLoading = onLoading) {
+                        matchList.value!!
+                    }
+                }
+                if (!isRefresh) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(1f)
+                            .fillMaxHeight(1f), contentAlignment = Alignment.TopCenter
+                    ) {
+                        val clicked = remember { mutableStateListOf<Boolean>(*Array(300) { false }) }
+                        Box(modifier = Modifier
+                            .fillMaxSize()
+                            .padding(10.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(color = colorResource(id = R.color.app_color8))) {
+                            LazyColumn(modifier = Modifier.padding(5.dp).fillMaxSize()) {
+                                itemsIndexed(pagingData) { index, item ->
+                                    if (item != null) {
+                                        DisplayCard(list = { item }, index = index, isExpanded = clicked[index]) {
+                                            clicked[index] = !clicked[index]
+                                        }
+                                        Spacer(modifier = Modifier.fillParentMaxHeight(0.03f))
+                                    }
                                 }
-                                Spacer(modifier = Modifier.fillParentMaxHeight(0.03f))
-                            } else {
-
                             }
                         }
                     }
@@ -155,8 +169,7 @@ fun MatchTypeRow(accessId: String, onLoading: () -> Unit, list: () -> List<Match
         modifier = Modifier
             .wrapContentHeight()
             .fillMaxWidth()
-            .padding(5.dp)
-            .padding(top = 20.dp), contentAlignment = Alignment.Center
+            .padding(5.dp), contentAlignment = Alignment.Center
     ) {
         LazyRow {
             itemsIndexed(list()) { index, item ->
@@ -174,7 +187,7 @@ fun MatchListCard(accessId: String, item: MatchTypeData, index: Int, selected: B
             .fillMaxWidth()
             .border(width = 1.dp, color = Color.Black, CircleShape)
             .clip(CircleShape)
-            .background(if (selected) colorResource(id = R.color.app_color) else Color.White)
+            .background(if (selected) colorResource(id = R.color.app_color6) else colorResource(id = R.color.app_color8))
             .padding(15.dp)
             .clickable(interactionSource = MutableInteractionSource(), indication = null) {
                 onLoading.invoke()
@@ -192,7 +205,7 @@ fun DisplayCard(list: () -> MatchDetailData, index: Int, isExpanded: Boolean, vi
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .clip(RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(20.dp))
             .background(
                 color = when (list().result1) {
                     "승", "몰수승" -> colorResource(id = R.color.win).copy(alpha = 0.5f)
@@ -301,7 +314,7 @@ fun DisplayCard(list: () -> MatchDetailData, index: Int, isExpanded: Boolean, vi
 
 @Composable
 fun DetailView(
-    viewModel: MatchViewModel = hiltViewModel(), data: () -> MatchDetailData
+    viewModel: MatchViewModel = hiltViewModel(), data: () -> MatchDetailData,
 ) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(
@@ -465,13 +478,13 @@ fun DetailView(
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                    Text(text = "${data.invoke().averageRating1} / 5.0", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "${data.invoke().averageRating1} / 10.0", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
                     Text(text = "경기평점", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                    Text(text = "${data.invoke().averageRating2} / 5.0", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "${data.invoke().averageRating2} / 10.0", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }

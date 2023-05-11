@@ -10,10 +10,7 @@ import com.example.domain.usecase.MetaDataUseCase
 import com.example.domain.usecase.UserUseCase
 import com.example.myapp.map.Mapper
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,14 +42,16 @@ class UserViewModel @Inject constructor(
             isLoading.postValue(false)
             error.value = if (t.message!!.contains("400")) "사용자 정보가 없습니다" else t.message
         }) {
-            _userAccessId.value = ""
-            error.value = ""
-            val result = useCase.getUserData(nickName)
-            result.let {
-                _userData.postValue(it.nickname)
-                _userLevel.postValue(it.level.toString())
-                _userAccessId.postValue(it.accessId)
-                getBestRank(it.accessId)
+            withContext(Dispatchers.IO) {
+                _userAccessId.postValue("")
+                error.postValue("")
+                val result = useCase.getUserData(nickName)
+                result.let {
+                    _userData.postValue(it.nickname)
+                    _userLevel.postValue(it.level.toString())
+                    _userAccessId.postValue(it.accessId)
+                    getBestRank(it.accessId)
+                }
             }
         }.invokeOnCompletion {
         }

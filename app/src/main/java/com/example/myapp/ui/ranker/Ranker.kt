@@ -85,15 +85,13 @@ fun Ranker(viewModel: RankerViewModel = hiltViewModel()) {
                 .padding(15.dp), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
-                modifier = Modifier
-                    .wrapContentSize(), contentAlignment = Alignment.TopCenter
+                modifier = Modifier.wrapContentSize(), contentAlignment = Alignment.TopCenter
             ) {
                 Text(text = "랭커들이 쓴 평균 선수 스탯", fontSize = 20.sp, fontWeight = FontWeight.Bold)
             }
             Spacer(modifier = Modifier.fillMaxHeight(0.05f))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-                OutlinedTextField(
-                    value = text,
+                OutlinedTextField(value = text,
                     onValueChange = setValue,
                     enabled = true,
                     label = { (Icon(painter = painterResource(id = R.drawable.ic_usersearch), contentDescription = "")) },
@@ -164,9 +162,7 @@ fun SearchResultCard(item: SearchRankerData, index: Int, onSelected: (Int) -> Un
                     .padding(10.dp), verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
-                    painter = rememberAsyncImagePainter(model = item.image),
-                    contentDescription = null,
-                    modifier = Modifier.size(25.dp)
+                    painter = rememberAsyncImagePainter(model = item.image), contentDescription = null, modifier = Modifier.size(25.dp)
                 )
                 Spacer(modifier = Modifier.fillMaxWidth(0.01f))
                 Text(text = item.name, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
@@ -191,8 +187,7 @@ fun RankerDataCard(item: RankerPlayerData, viewModel: RankerViewModel = hiltView
                 .height(100.dp), contentAlignment = Alignment.BottomCenter
         ) {
             Canvas(
-                modifier = Modifier
-                    .size(100.dp)
+                modifier = Modifier.size(100.dp)
             ) {
                 drawArc(
                     topLeft = Offset(0f, size.height / 2), color = color,
@@ -202,8 +197,7 @@ fun RankerDataCard(item: RankerPlayerData, viewModel: RankerViewModel = hiltView
             Column {
                 Spacer(modifier = Modifier.fillMaxHeight(0.6f))
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize(), contentAlignment = Alignment.Center
+                    modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                 ) {
                     Text(text = if (item.status.matchCount != 20) "${item.status.matchCount}회 사용" else "20회 이상 사용", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
                 }

@@ -14,7 +14,7 @@ class Mapper {
             val date = item.achievementDate
             val removedDate = date.removeRange(0, 2)
             val slicedDate = removedDate.split("T")
-            val resultDate = "${slicedDate[0]}  ${slicedDate[1]}"
+            val resultDate = slicedDate[0]
             list.add(
                 i,
                 BestRankList(
