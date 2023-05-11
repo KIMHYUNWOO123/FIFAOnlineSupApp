@@ -5,13 +5,12 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -66,78 +65,103 @@ fun Ranker(viewModel: RankerViewModel = hiltViewModel()) {
             .fillMaxSize()
             .clickable(interactionSource = MutableInteractionSource(), indication = null) { hideKeyboard.invoke() }, contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(15.dp), contentAlignment = Alignment.TopStart
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_back_24), modifier = Modifier
-                    .size(30.dp)
-                    .clickable(
-                        interactionSource = MutableInteractionSource(), indication = null
-                    ) { backPressedDispatcher?.onBackPressed() }, contentDescription = "뒤로가기", contentScale = ContentScale.Crop
-            )
-        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(15.dp), horizontalAlignment = Alignment.CenterHorizontally
+                .background(colorResource(id = R.color.app_color1)), horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
-                modifier = Modifier.wrapContentSize(), contentAlignment = Alignment.TopCenter
-            ) {
-                Text(text = "랭커들이 쓴 평균 선수 스탯", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            }
-            Spacer(modifier = Modifier.fillMaxHeight(0.05f))
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-                OutlinedTextField(value = text,
-                    onValueChange = setValue,
-                    enabled = true,
-                    label = { (Icon(painter = painterResource(id = R.drawable.ic_usersearch), contentDescription = "")) },
-                    placeholder = { (Text(text = "Search for player")) },
-                    textStyle = TextStyle(fontSize = 20.sp, color = Color.Black),
-                    maxLines = 1,
-                    singleLine = true
-                )
-            }
-            Box(
-                contentAlignment = Alignment.Center, modifier = Modifier
-                    .border(1.dp, color = Color.DarkGray)
-                    .padding(start = 10.dp, end = 10.dp)
+            Row(
+                modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.3f)
+                    .background(colorResource(id = R.color.app_color2))
             ) {
-                if (searchData != null) {
-                    var isSelectIndex by remember {
-                        mutableStateOf(-1)
-                    }
-                    val onSelected: (Int) -> Unit = {
-                        isSelectIndex = it
-                    }
-                    LazyColumn(verticalArrangement = Arrangement.Top) {
-                        itemsIndexed(searchData!!) { index, item ->
-                            SearchResultCard(item = item, index = index, onSelected, isSelected = isSelectIndex == index, hideKeyboard)
-                            Divider(thickness = 1.dp, color = Color.LightGray)
-                        }
-                    }
-                    if (isSearchLoading!!) {
-                        isSelectIndex = -1
-                        viewModel.setRankerList()
-                        CircleLoadingBar()
+                Box(
+                    modifier = Modifier.padding(10.dp), contentAlignment = Alignment.TopStart
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_back_new), modifier = Modifier
+                            .size(30.dp)
+                            .clickable(
+                                interactionSource = MutableInteractionSource(), indication = null
+                            ) { backPressedDispatcher?.onBackPressed() }, contentDescription = "뒤로가기", contentScale = ContentScale.Crop
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(), contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "거래 내역", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = colorResource(id = R.color.app_color4))
                     }
                 }
             }
-            if (rankerData != null) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(5.dp)) {
-                    LazyColumn(verticalArrangement = Arrangement.Top) {
-                        items(rankerData!!) {
-                            RankerDataCard(item = it)
-                            Spacer(modifier = Modifier.fillParentMaxHeight(0.03f))
+            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally) {
+                val customTextFieldColors: TextFieldColors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = colorResource(id = R.color.app_color5),
+                    unfocusedBorderColor = colorResource(id = R.color.app_color6),
+                    focusedLabelColor = colorResource(id = R.color.app_color5),
+                    unfocusedLabelColor = colorResource(id = R.color.app_color6),
+                    backgroundColor = colorResource(id = R.color.app_color8),
+                    cursorColor = colorResource(id = R.color.app_color1),
+                    placeholderColor = colorResource(id = R.color.app_color5),
+                    textColor = colorResource(id = R.color.app_color1)
+                )
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+                    OutlinedTextField(
+                        value = text,
+                        onValueChange = { setValue.invoke(it) },
+                        enabled = true,
+                        label = { (Icon(painter = painterResource(id = R.drawable.ic_search_user_new), contentDescription = "")) },
+                        placeholder = { (Text(text = "Search for player")) },
+                        textStyle = TextStyle(fontSize = 20.sp, color = Color.Black),
+                        maxLines = 1,
+                        shape = RoundedCornerShape(30.dp),
+                        singleLine = true,
+                        colors = customTextFieldColors,
+                    )
+                }
+                Box(
+                    contentAlignment = Alignment.Center, modifier = Modifier
+                        .padding(start = 10.dp, end = 10.dp, top = 10.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(color = colorResource(id = R.color.app_color8))
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.3f)
+                ) {
+                    if (searchData != null) {
+                        var isSelectIndex by remember {
+                            mutableStateOf(-1)
+                        }
+                        val onSelected: (Int) -> Unit = {
+                            isSelectIndex = it
+                        }
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                        ) {
+                            itemsIndexed(items = searchData!!) { index, item ->
+                                SearchResultCard(item = item, index = index, onSelected, isSelected = isSelectIndex == index, hideKeyboard)
+                            }
+                        }
+                        if (isSearchLoading!!) {
+                            isSelectIndex = -1
+                            viewModel.setRankerList()
+                            CircleLoadingBar()
                         }
                     }
-                    if (isRankerLoading!!) {
-                        CircleLoadingBar()
+                }
+                if (rankerData != null) {
+                    Box(
+                        contentAlignment = Alignment.TopCenter, modifier = Modifier
+                            .padding(start = 5.dp, end = 5.dp)
+                            .fillMaxSize()
+                    ) {
+                        LazyColumn(verticalArrangement = Arrangement.Top, modifier = Modifier.fillMaxSize()) {
+                            items(rankerData!!) {
+                                RankerDataCard(item = it)
+                                Spacer(modifier = Modifier.fillParentMaxHeight(0.02f))
+                            }
+                        }
+                        if (isRankerLoading!!) {
+                            CircleLoadingBar()
+                        }
                     }
                 }
             }
@@ -147,8 +171,13 @@ fun Ranker(viewModel: RankerViewModel = hiltViewModel()) {
 
 @Composable
 fun SearchResultCard(item: SearchRankerData, index: Int, onSelected: (Int) -> Unit, isSelected: Boolean, hideKeyboard: () -> Unit, viewModel: RankerViewModel = hiltViewModel()) {
-    Box(contentAlignment = Alignment.Center, modifier = Modifier.background(color = if (isSelected) colorResource(id = R.color.app_color) else Color.White)) {
+    Box(
+        contentAlignment = Alignment.Center, modifier = Modifier
+            .fillMaxSize()
+            .background(color = if (isSelected) colorResource(id = R.color.app_color) else Color.White)
+    ) {
         Box(contentAlignment = Alignment.CenterStart, modifier = Modifier
+            .fillMaxSize()
             .padding(start = 5.dp)
             .clickable(interactionSource = MutableInteractionSource(), indication = null) {
                 onSelected.invoke(index)
@@ -159,13 +188,14 @@ fun SearchResultCard(item: SearchRankerData, index: Int, onSelected: (Int) -> Un
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .fillMaxHeight()
                     .padding(10.dp), verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
                     painter = rememberAsyncImagePainter(model = item.image), contentDescription = null, modifier = Modifier.size(25.dp)
                 )
-                Spacer(modifier = Modifier.fillMaxWidth(0.01f))
-                Text(text = item.name, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                Spacer(modifier = Modifier.fillMaxWidth(0.02f))
+                Text(text = item.name, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, modifier = Modifier.fillMaxSize(), color = colorResource(id = R.color.app_color1))
             }
         }
     }
@@ -207,7 +237,9 @@ fun RankerDataCard(item: RankerPlayerData, viewModel: RankerViewModel = hiltView
             contentAlignment = Alignment.Center, modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(10.dp))
-                .border(3.dp, color = color, shape = RoundedCornerShape(10.dp))
+                .background(colorResource(id = R.color.app_color8))
+                .border(5.dp, color = color, shape = RoundedCornerShape(10.dp))
+
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(
@@ -218,71 +250,80 @@ fun RankerDataCard(item: RankerPlayerData, viewModel: RankerViewModel = hiltView
                 ) {
                     Text(text = item.spPosition, fontSize = 15.sp, color = Color.White)
                 }
-                Divider(thickness = 1.dp, color = Color.LightGray)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 5.dp, horizontal = 5.dp), verticalAlignment = Alignment.CenterVertically
+                        .background(color = color)
+                        .padding(vertical = 5.dp, horizontal = 10.dp), verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxHeight(0.4f)
-                            .fillMaxWidth(0.2f), contentAlignment = Alignment.Center
+                            .fillMaxWidth(0.2f)
+                            .clip(RoundedCornerShape(15.dp))
+                            .background(colorResource(id = R.color.app_color8)), contentAlignment = Alignment.Center
+
                     ) {
                         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(text = "골")
-                            Divider(thickness = 0.5.dp, color = Color.LightGray)
                             Text(text = item.status.goal.toString())
                         }
                     }
+                    Spacer(modifier = Modifier.width(3.dp))
                     Box(
                         modifier = Modifier
                             .fillMaxHeight(0.4f)
-                            .fillMaxWidth(0.25f), contentAlignment = Alignment.Center
+                            .fillMaxWidth(0.25f)
+                            .clip(RoundedCornerShape(15.dp))
+                            .background(colorResource(id = R.color.app_color8)), contentAlignment = Alignment.Center
                     ) {
                         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = "어시스트")
-                            Divider(thickness = 0.5.dp, color = Color.LightGray)
+                            Text(text = "도움")
                             Text(text = item.status.assist.toString())
                         }
                     }
+                    Spacer(modifier = Modifier.width(3.dp))
                     Box(
                         modifier = Modifier
                             .fillMaxHeight(0.4f)
-                            .fillMaxWidth(0.333f), contentAlignment = Alignment.Center
+                            .fillMaxWidth(0.333f)
+                            .clip(RoundedCornerShape(15.dp))
+                            .background(colorResource(id = R.color.app_color8)), contentAlignment = Alignment.Center
                     ) {
                         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(text = "슈팅")
-                            Divider(thickness = 0.5.dp, color = Color.LightGray)
                             Text(text = item.status.shoot.toString())
                         }
                     }
+                    Spacer(modifier = Modifier.width(3.dp))
                     Box(
                         modifier = Modifier
                             .fillMaxHeight(0.4f)
-                            .fillMaxWidth(0.5f), contentAlignment = Alignment.Center
+                            .fillMaxWidth(0.5f)
+                            .clip(RoundedCornerShape(15.dp))
+                            .background(colorResource(id = R.color.app_color8)), contentAlignment = Alignment.Center
                     ) {
                         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(text = "패스")
-                            Divider(thickness = 0.5.dp, color = Color.LightGray)
                             Text(text = item.status.passTry.toString())
                         }
                     }
+                    Spacer(modifier = Modifier.width(3.dp))
                     Box(
                         modifier = Modifier
                             .fillMaxHeight(0.4f)
-                            .fillMaxWidth(1f), contentAlignment = Alignment.Center
+                            .fillMaxWidth(1f)
+                            .clip(RoundedCornerShape(15.dp))
+                            .background(colorResource(id = R.color.app_color8)), contentAlignment = Alignment.Center
                     ) {
                         val sum = (item.status.tackle + item.status.block) / 2
                         val defence = String.format("%.2f", sum).toFloat()
                         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(text = "수비")
-                            Divider(thickness = 0.5.dp, color = Color.LightGray)
                             Text(text = defence.toString())
                         }
                     }
                 }
-                Divider(thickness = 1.dp, color = Color.LightGray)
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
