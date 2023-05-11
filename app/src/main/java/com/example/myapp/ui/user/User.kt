@@ -11,10 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -40,7 +37,7 @@ import com.example.myapp.utils.LoadingBar
 
 @Composable
 fun User(
-    viewModel: UserViewModel = hiltViewModel(), onMatchView: (String) -> Unit, onTransactionView: (String) -> Unit
+    viewModel: UserViewModel = hiltViewModel(), onMatchView: (String) -> Unit, onTransactionView: (String) -> Unit,
 ) {
     val name by viewModel.userData.observeAsState()
     val level by viewModel.userLevel.observeAsState()
@@ -63,152 +60,172 @@ fun User(
 //       viewModel.getBestRank("03704d4c66349949a799704a")
     }
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(15.dp), contentAlignment = Alignment.TopStart
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_back_24), modifier = Modifier
-                    .size(30.dp)
-                    .clickable(
-                        interactionSource = MutableInteractionSource(), indication = null
-                    ) { backPressedDispatcher?.onBackPressed() }, contentDescription = "뒤로가기", contentScale = ContentScale.Crop
-            )
-        }
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(15.dp), horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
-                modifier = Modifier
-                    .wrapContentSize(), contentAlignment = Alignment.TopCenter
-            ) {
-                Text(text = "유저 정보", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            }
-            Spacer(modifier = Modifier.fillMaxHeight(0.1f))
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-                OutlinedTextField(
-                    value = text,
-                    onValueChange = { setValue.invoke(it) },
-                    enabled = true,
-                    label = { (Icon(painter = painterResource(id = R.drawable.ic_usersearch), contentDescription = "")) },
-                    placeholder = { (Text(text = "Search for user")) },
-                    textStyle = TextStyle(fontSize = 20.sp, color = Color.Black),
-                    maxLines = 1,
-                    singleLine = true
-                )
-            }
-            Box(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 10.dp), contentAlignment = Alignment.Center
+                    .background(colorResource(id = R.color.app_color2))
             ) {
-                val interactionSource = remember {
-                    MutableInteractionSource()
+                Box(
+                    modifier = Modifier.padding(10.dp), contentAlignment = Alignment.TopStart
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_back_new), modifier = Modifier
+                            .size(30.dp)
+                            .clickable(
+                                interactionSource = MutableInteractionSource(), indication = null
+                            ) { backPressedDispatcher?.onBackPressed() }, contentDescription = "뒤로가기", contentScale = ContentScale.Crop
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(), contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "유저 정보", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = colorResource(id = R.color.app_color4))
+                    }
                 }
-                val isClick by interactionSource.collectIsPressedAsState()
-
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = colorResource(id = R.color.app_color1)), horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.fillMaxHeight(0.05f))
+                val customTextFieldColors: TextFieldColors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = colorResource(id = R.color.app_color5),
+                    unfocusedBorderColor = colorResource(id = R.color.app_color6),
+                    focusedLabelColor = colorResource(id = R.color.app_color5),
+                    unfocusedLabelColor = colorResource(id = R.color.app_color6),
+                    backgroundColor = colorResource(id = R.color.app_color8),
+                    cursorColor = colorResource(id = R.color.app_color1),
+                    placeholderColor = colorResource(id = R.color.app_color5),
+                    textColor = colorResource(id = R.color.app_color1)
+                )
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+                    OutlinedTextField(
+                        value = text,
+                        onValueChange = { setValue.invoke(it) },
+                        enabled = true,
+                        label = { (Icon(painter = painterResource(id = R.drawable.ic_search_user_new), contentDescription = "")) },
+                        placeholder = { (Text(text = "Search for user")) },
+                        textStyle = TextStyle(fontSize = 20.sp, color = Color.Black),
+                        maxLines = 1,
+                        shape = RoundedCornerShape(30.dp),
+                        singleLine = true,
+                        colors = customTextFieldColors,
+                    )
+                }
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(0.3f)
-                        .clickable(interactionSource = interactionSource, indication = null) {
-                            viewModel.getUserData(text)
-                            focusManager.clearFocus()
-                            onInitView.invoke()
-                        }
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(color = if (isClick) colorResource(id = R.color.app_color) else colorResource(id = R.color.white))
-                        .border(width = 1.dp, color = colorResource(id = R.color.app_color), shape = RoundedCornerShape(10.dp))
-                        .size(40.dp),
-                )
-                Text(text = "검색하기", textAlign = TextAlign.Center, color = if (isClick) Color.White else Color.Black, fontSize = 15.sp)
-            }
-            if (accessId!!.isNotBlank()) {
-                Row(
-                    modifier = Modifier
                         .fillMaxWidth()
-                        .padding(10.dp)
+                        .padding(top = 10.dp), contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(0.4f), contentAlignment = Alignment.Center
-                    ) {
-                        Image(modifier = Modifier.size(30.dp), painter = painterResource(id = R.drawable.ic_nickname), contentDescription = "")
+                    val interactionSource = remember {
+                        MutableInteractionSource()
                     }
+                    val isClick by interactionSource.collectIsPressedAsState()
+
                     Box(
-                        modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = name.toString(), fontSize = 25.sp, fontStyle = FontStyle.Italic)
-                    }
+                        modifier = Modifier
+                            .fillMaxWidth(0.8f)
+                            .clickable(interactionSource = interactionSource, indication = null) {
+                                viewModel.getUserData(text)
+                                focusManager.clearFocus()
+                                onInitView.invoke()
+                            }
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(color = if (isClick) colorResource(id = R.color.app_color5) else colorResource(id = R.color.app_color8))
+                            .size(40.dp),
+                    )
+                    Text(text = "검색하기", textAlign = TextAlign.Center, color = if (isClick) Color.White else Color.Black, fontSize = 15.sp)
                 }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(0.4f), contentAlignment = Alignment.Center
+                if (accessId!!.isNotBlank()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp)
                     ) {
-                        Text(text = "LV", fontSize = 25.sp, color = Color.Blue)
-                    }
-                    Box(
-                        modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = level.toString(), fontSize = 25.sp)
-                    }
-                }
-                if (!bestRankList.isNullOrEmpty() && isLoading == false) {
-                    Column(modifier = Modifier.wrapContentHeight()) {
                         Box(
-                            modifier = Modifier
-                                .wrapContentHeight()
-                                .fillMaxWidth(), contentAlignment = Alignment.Center
+                            modifier = Modifier.fillMaxWidth(0.4f), contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "최고기록", fontSize = 20.sp)
+                            Image(modifier = Modifier.size(30.dp), painter = painterResource(id = R.drawable.ic_nickname), contentDescription = "")
                         }
-                        BestRankView { bestRankList!! }
-                    }
-                    val matchInteractionSource = remember {
-                        MutableInteractionSource()
-                    }
-                    val matchIsPress by matchInteractionSource.collectIsPressedAsState()
-                    Box(modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .clickable(interactionSource = matchInteractionSource, indication = null) {
-                            onMatchView(accessId.toString())
+                        Box(
+                            modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = name.toString(), fontSize = 25.sp, fontStyle = FontStyle.Italic)
                         }
-                        .padding(top = 30.dp)
-                        .wrapContentHeight()
-                        .clip(RectangleShape)
-                        .border(width = 1.dp, color = colorResource(id = R.color.app_color))
-                        .background(if (matchIsPress) colorResource(id = R.color.app_color) else Color.White), contentAlignment = Alignment.Center) {
-                        Text(modifier = Modifier.padding(vertical = 15.dp), text = "경기 기록", fontSize = 30.sp, color = if (matchIsPress) Color.White else Color.Black)
                     }
-                    val transactionInteractionSource = remember {
-                        MutableInteractionSource()
-                    }
-                    val transactionIsPress by transactionInteractionSource.collectIsPressedAsState()
-                    Box(modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .clickable(interactionSource = transactionInteractionSource, indication = null) {
-                            onTransactionView(accessId.toString())
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(0.4f), contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "LV", fontSize = 25.sp, color = Color.Blue)
                         }
-                        .padding(top = 30.dp)
-                        .wrapContentHeight()
-                        .clip(RectangleShape)
-                        .border(width = 1.dp, color = colorResource(id = R.color.app_color))
-                        .background(if (transactionIsPress) colorResource(id = R.color.app_color) else Color.White), contentAlignment = Alignment.Center) {
-                        Text(modifier = Modifier.padding(vertical = 15.dp), text = "거래 내역", fontSize = 30.sp, color = if (transactionIsPress) Color.White else Color.Black)
+                        Box(
+                            modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = level.toString(), fontSize = 25.sp)
+                        }
+                    }
+                    if (!bestRankList.isNullOrEmpty() && isLoading == false) {
+                        Column(modifier = Modifier.wrapContentHeight()) {
+                            Box(
+                                modifier = Modifier
+                                    .wrapContentHeight()
+                                    .fillMaxWidth(), contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = "최고기록", fontSize = 20.sp)
+                            }
+                            BestRankView { bestRankList!! }
+                        }
+                        val matchInteractionSource = remember {
+                            MutableInteractionSource()
+                        }
+                        val matchIsPress by matchInteractionSource.collectIsPressedAsState()
+                        Box(modifier = Modifier
+                            .fillMaxWidth(0.8f)
+                            .clickable(interactionSource = matchInteractionSource, indication = null) {
+                                onMatchView(accessId.toString())
+                            }
+                            .padding(top = 30.dp)
+                            .wrapContentHeight()
+                            .clip(RectangleShape)
+                            .border(width = 1.dp, color = colorResource(id = R.color.app_color))
+                            .background(if (matchIsPress) colorResource(id = R.color.app_color) else Color.White), contentAlignment = Alignment.Center) {
+                            Text(modifier = Modifier.padding(vertical = 15.dp), text = "경기 기록", fontSize = 30.sp, color = if (matchIsPress) Color.White else Color.Black)
+                        }
+                        val transactionInteractionSource = remember {
+                            MutableInteractionSource()
+                        }
+                        val transactionIsPress by transactionInteractionSource.collectIsPressedAsState()
+                        Box(modifier = Modifier
+                            .fillMaxWidth(0.8f)
+                            .clickable(interactionSource = transactionInteractionSource, indication = null) {
+                                onTransactionView(accessId.toString())
+                            }
+                            .padding(top = 30.dp)
+                            .wrapContentHeight()
+                            .clip(RectangleShape)
+                            .border(width = 1.dp, color = colorResource(id = R.color.app_color))
+                            .background(if (transactionIsPress) colorResource(id = R.color.app_color) else Color.White), contentAlignment = Alignment.Center) {
+                            Text(modifier = Modifier.padding(vertical = 15.dp), text = "거래 내역", fontSize = 30.sp, color = if (transactionIsPress) Color.White else Color.Black)
+                        }
                     }
                 }
+                if (error!!.isNotBlank()) {
+                    EmptyView()
+                }
             }
-            if (error!!.isNotBlank()) {
-                EmptyView()
+            if (isLoading!!) {
+                LoadingBar()
             }
-        }
-        if (isLoading!!) {
-            LoadingBar()
         }
     }
 }

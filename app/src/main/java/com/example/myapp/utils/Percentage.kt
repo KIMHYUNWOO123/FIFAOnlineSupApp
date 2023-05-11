@@ -19,7 +19,7 @@ fun Percentage(percentage: Int, color: Color) {
         modifier = Modifier.size(100.dp)
     ) {
         Canvas(modifier = Modifier.size(80.dp)) {
-            val strokeWidth = 10f
+            val strokeWidth = 15f
             val strokeColor = Color.Gray
             val radius = size / 2f
 

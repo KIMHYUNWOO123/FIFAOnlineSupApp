@@ -27,4 +27,13 @@
     <color name="df">#588D49</color>
     <color name="mf">#2B4F83</color>
     <color name="fw">#862632</color>
+    <color name="app_color1">#2A2F4F</color>
+    <color name="app_color2">#917FB3</color>
+    <color name="app_color3">#E5BEEC</color>
+    <color name="app_color5">#B1B2FF</color>
+    <color name="app_color4">#FDE2F3</color>
+    <color name="app_color6">#AAC4FF</color>
+    <color name="app_color7">#D2DAFF</color>
+    <color name="app_color8">#EEF1FF</color>
+
 </resources>
