@@ -53,7 +53,7 @@ class MatchViewModel @Inject constructor(
             Log.d("MatchViewModel", "Exception: $t")
             error.postValue(t.message.toString())
         }) {
-            val result = metaDataUseCase.getMatch()
+            val result = metaDataUseCase.getMatch(60)
             result.let { _matchTypeList.postValue(it) }
         }
         myJob?.invokeOnCompletion {

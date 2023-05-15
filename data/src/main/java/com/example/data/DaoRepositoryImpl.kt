@@ -12,8 +12,8 @@ class DaoRepositoryImpl @Inject constructor(
         db.matchTypeDao().insertMatchType(list)
     }
 
-    override suspend fun getTypeMatch(): List<MatchTypeData> {
-        return db.matchTypeDao().getMatchTypeList()
+    override suspend fun getTypeMatch(limit : Int ): List<MatchTypeData> {
+        return db.matchTypeDao().getMatchTypeList(limit)
     }
 
     override suspend fun deleteMatch() {

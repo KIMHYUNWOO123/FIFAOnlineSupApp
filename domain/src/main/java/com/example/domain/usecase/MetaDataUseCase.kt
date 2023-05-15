@@ -9,7 +9,7 @@ import javax.inject.Inject
 class MetaDataUseCase @Inject constructor(
     private val daoRepository: DaoRepository,
     private val repository: Repository,
-    private val pref: SharedPreferencesService
+    private val pref: SharedPreferencesService,
 ) {
 
     // Dao
@@ -17,8 +17,8 @@ class MetaDataUseCase @Inject constructor(
         daoRepository.insertTypeMatch(list)
     }
 
-    suspend fun getMatch(): List<MatchTypeData> {
-        return daoRepository.getTypeMatch()
+    suspend fun getMatch(limit: Int = 234): List<MatchTypeData> {
+        return daoRepository.getTypeMatch(limit)
     }
 
     suspend fun deleteMatch() {

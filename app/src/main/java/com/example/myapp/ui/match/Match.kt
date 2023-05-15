@@ -127,12 +127,16 @@ fun Match(
                             .fillMaxHeight(1f), contentAlignment = Alignment.TopCenter
                     ) {
                         val clicked = remember { mutableStateListOf<Boolean>(*Array(300) { false }) }
-                        Box(modifier = Modifier
-                            .fillMaxSize()
-                            .padding(10.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(color = colorResource(id = R.color.app_color8))) {
-                            LazyColumn(modifier = Modifier.padding(5.dp).fillMaxSize()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(10.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(color = colorResource(id = R.color.app_color8))
+                        ) {
+                            LazyColumn(modifier = Modifier
+                                .padding(5.dp)
+                                .fillMaxSize()) {
                                 itemsIndexed(pagingData) { index, item ->
                                     if (item != null) {
                                         DisplayCard(list = { item }, index = index, isExpanded = clicked[index]) {
@@ -221,7 +225,7 @@ fun DisplayCard(list: () -> MatchDetailData, index: Int, isExpanded: Boolean, vi
             modifier = Modifier.fillMaxSize()
         ) {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text(text = list().date.replace("T", "  "), fontSize = 15.sp)
+                Text(text = list().date, fontSize = 15.sp)
             }
             Divider(color = Color.LightGray, thickness = 1.dp)
             Row(

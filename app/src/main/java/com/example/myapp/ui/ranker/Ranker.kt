@@ -55,6 +55,7 @@ fun Ranker(viewModel: RankerViewModel = hiltViewModel()) {
             viewModel.setRankerList()
         }
     }
+    val error by viewModel.error.observeAsState()
     val hideKeyboard = {
         focusManager.clearFocus()
     }
@@ -89,7 +90,7 @@ fun Ranker(viewModel: RankerViewModel = hiltViewModel()) {
                         modifier = Modifier
                             .fillMaxWidth(), contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "거래 내역", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = colorResource(id = R.color.app_color4))
+                        Text(text = "선수 평균 스탯", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = colorResource(id = R.color.app_color4))
                     }
                 }
             }
@@ -147,12 +148,12 @@ fun Ranker(viewModel: RankerViewModel = hiltViewModel()) {
                         }
                     }
                 }
-                if (rankerData != null) {
-                    Box(
-                        contentAlignment = Alignment.TopCenter, modifier = Modifier
-                            .padding(start = 5.dp, end = 5.dp)
-                            .fillMaxSize()
-                    ) {
+                Box(
+                    contentAlignment = Alignment.TopCenter, modifier = Modifier
+                        .padding(start = 5.dp, end = 5.dp)
+                        .fillMaxSize()
+                ) {
+                    if (rankerData != null) {
                         LazyColumn(verticalArrangement = Arrangement.Top, modifier = Modifier.fillMaxSize()) {
                             items(rankerData!!) {
                                 RankerDataCard(item = it)
@@ -161,6 +162,14 @@ fun Ranker(viewModel: RankerViewModel = hiltViewModel()) {
                         }
                         if (isRankerLoading!!) {
                             CircleLoadingBar()
+                        }
+                    }
+                    if (error!!.isNotEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(), contentAlignment = Alignment.Center
+                        ) {
+                            Image(painter = painterResource(id = R.drawable.baseline_cancel_24), contentDescription = null, Modifier.size(50.dp))
                         }
                     }
                 }

@@ -36,6 +36,7 @@ class RankerViewModel @Inject constructor(
 
     fun searchSpId(name: String) {
         myJob?.cancel()
+        error.postValue("")
         isSearchLoading.postValue(true)
         myJob = viewModelScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, t ->
             error.postValue(t.message.toString())
@@ -44,7 +45,6 @@ class RankerViewModel @Inject constructor(
         }) {
             withContext(Dispatchers.IO) {
                 val result = metaDataUseCase.searchSpId("%$name%")
-                val result1 = metaDataUseCase.searchSpId("%")
                 val seasonIdData = metaDataUseCase.getSeasonId()
                 result.let {
                     _spIdData.postValue(mapper.searchRankerDataMap(it, seasonIdData))
@@ -62,6 +62,7 @@ class RankerViewModel @Inject constructor(
 
     fun getPlayerData(matchType: Int, spId: Int) {
         myApiJob?.cancel()
+        error.postValue("")
         isRankerLoading.postValue(true)
         myApiJob = viewModelScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, t ->
             error.postValue(t.message)

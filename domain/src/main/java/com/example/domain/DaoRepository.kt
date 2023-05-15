@@ -4,7 +4,7 @@ import com.example.domain.entity.*
 
 interface DaoRepository {
     suspend fun insertTypeMatch(list: List<MatchTypeData>)
-    suspend fun getTypeMatch(): List<MatchTypeData>
+    suspend fun getTypeMatch(limit: Int = 234): List<MatchTypeData>
     suspend fun deleteMatch()
     suspend fun insertDivision(list: List<DivisionData>)
     suspend fun getDivision(): List<DivisionData>

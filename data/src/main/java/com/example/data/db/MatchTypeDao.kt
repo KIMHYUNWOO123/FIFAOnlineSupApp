@@ -11,8 +11,8 @@ interface MatchTypeDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMatchType(list: List<MatchTypeData>)
 
-    @Query("SELECT * FROM match")
-    suspend fun getMatchTypeList(): List<MatchTypeData>
+    @Query("SELECT * FROM match WHERE matchType <= :limit")
+    suspend fun getMatchTypeList(limit : Int = 234): List<MatchTypeData>
 
     @Query("DELETE FROM match")
     suspend fun deleteMatchType()

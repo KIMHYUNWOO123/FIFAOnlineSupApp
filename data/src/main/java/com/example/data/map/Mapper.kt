@@ -1,19 +1,52 @@
 package com.example.data.map
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.domain.entity.DetailMatchRecordEntity
 import com.example.domain.entity.MatchDetailData
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 class Mapper {
+    @RequiresApi(Build.VERSION_CODES.O)
     fun detailDataMap(accessId: String, list: DetailMatchRecordEntity): MatchDetailData {
         if (list.matchInfo.size > 1) {
             val isFirst = list.matchInfo[0].accessId == accessId
             val dataList = list.matchInfo
+            val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+            val localDateTime = LocalDateTime.parse(list.matchDate, formatter)
+            val time = localDateTime.toInstant(ZoneOffset.UTC).toEpochMilli()
+            val currentDate = System.currentTimeMillis()
+            val milliseconds = currentDate - time
+            val days = milliseconds / (24 * 60 * 60 * 1000)
+            val hours = (milliseconds % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)
+            val minutes = (milliseconds % (60 * 60 * 1000)) / (60 * 1000)
+            val seconds = (milliseconds % (60 * 1000)) / 1000
+            val months = if (days > 30) (days / 30) else 0
+            val years = if (days > 365) (days / 365) else 0
+            val matchDate: String = if (years > 1) {
+                "$years 년전"
+            } else if (months > 1) {
+                "$months 달전"
+            } else if (days > 1) {
+                "$days 일전"
+            } else if (hours.toInt() != 0) {
+                "$hours 시간전"
+            } else if (minutes.toInt() != 0) {
+                "$minutes 분전"
+            } else if (seconds.toInt() != 0) {
+                "$seconds 초전"
+            } else {
+                "0"
+            }
             if (!isFirst) {
                 Collections.swap(dataList, 0, 1)
             }
-            val matchDate = list.matchDate
             val nickname1 = dataList[0].nickname
             val nickname2 = dataList[1].nickname ?: ""
             val displayGoal1 = dataList[0].shoot.goalTotalDisplay
@@ -129,7 +162,32 @@ class Mapper {
             if (!isFirst) {
                 Collections.swap(dataList, 0, 1)
             }
-            val matchDate = list.matchDate
+            val date = list.matchDate.replace("T", " ").replace("-", " ").replace(":", " ")
+            val splitDate = date.split(" ")
+            val dateFormat = SimpleDateFormat("yyyy MM dd HH mm ss", Locale.getDefault())
+            val formattedDateTime = dateFormat.format(Date())
+            val currentDate = formattedDateTime.split(" ")
+            val year = currentDate[0].toInt() - splitDate[0].toInt()
+            val month = currentDate[1].toInt() - splitDate[1].toInt()
+            val day = currentDate[2].toInt() - splitDate[2].toInt()
+            val hour = currentDate[3].toInt() - splitDate[3].toInt()
+            val minute = currentDate[4].toInt() - splitDate[4].toInt()
+            val second = currentDate[5].toInt() - splitDate[5].toInt()
+            val matchDate: String = if (year != 0) {
+                "$year 년전"
+            } else if (month != 0) {
+                "$month 달전"
+            } else if ((day > 1)) {
+                "$day 일전"
+            } else if (hour != 0) {
+                "${abs(hour)} 시간전"
+            } else if (minute != 0) {
+                "$minute 분전"
+            } else if (second != 0) {
+                "$second 초전"
+            } else {
+                "0"
+            }
             val nickname1 = dataList[0].nickname
             val displayGoal1 = dataList[0].shoot.goalTotalDisplay
             val displayGoal2 = "-"

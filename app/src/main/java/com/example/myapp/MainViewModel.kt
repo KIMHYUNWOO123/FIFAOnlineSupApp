@@ -10,7 +10,6 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
 import javax.inject.Inject
 
 @HiltViewModel
@@ -122,11 +121,9 @@ class MainViewModel @Inject constructor(
     private fun isValuedSaveTime(): Boolean {
         val currentTime = System.currentTimeMillis()
         val saveTime = useCase.getMatchSaveTime().toLong()
-
-        val time = currentTime - saveTime
-        val dataFormat = SimpleDateFormat("dd")
-        val day = dataFormat.format(time).toInt()
-        return day < 30
+        val milliseconds = currentTime - saveTime
+        val days = milliseconds / (24 * 60 * 60 * 1000)
+        return days < 30
     }
 
 }
