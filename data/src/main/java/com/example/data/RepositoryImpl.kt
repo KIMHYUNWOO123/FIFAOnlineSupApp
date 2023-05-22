@@ -3,6 +3,7 @@ package com.example.data
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.example.data.PagingSource.Companion.PAGING_SIZE
 import com.example.domain.Repository
 import com.example.domain.entity.*
 import kotlinx.coroutines.flow.Flow
@@ -62,8 +63,10 @@ class RepositoryImpl @Inject constructor(
         val pagingFactory = { PagingSource(apiService, accessId, matchType) }
         return Pager(
             config = PagingConfig(
-                pageSize = 30,
-                initialLoadSize = 30,
+                pageSize = PAGING_SIZE,
+                initialLoadSize = PAGING_SIZE,
+                enablePlaceholders = false,
+                prefetchDistance = 1
             ),
             pagingSourceFactory = pagingFactory
         ).flow

@@ -6,27 +6,44 @@ plugins {
 }
 
 android {
-    namespace 'com.example.myapp'
+    namespace 'com.woo.myapp'
     compileSdk 33
 
 
     configurations { implementation.exclude group: 'org.jetbrains', module: 'annotations' }
 
     defaultConfig {
-        applicationId "com.example.myapp"
-        minSdk 24
+        applicationId "com.woo.myapp"
+        minSdk 26
         targetSdk 33
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.0.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
         }
     }
-
+    signingConfigs {
+        // local.properties 파일에 키스토어 정보를 추가해 주어야함
+        final propFile = project.rootProject.file('local.properties')
+        if (propFile.exists()) {
+            Properties prop = new Properties()
+            prop.load(new FileInputStream(propFile))
+            release {
+                storeFile file(prop.getProperty('release.keystore'))
+                storePassword prop.getProperty('release.pass')
+                keyAlias prop.getProperty('release.alias')
+                keyPassword prop.getProperty('release.pass')
+            }
+        } else {
+            // buildTypes.release 에서 참조시 에러가 나지 않도록 빈 property 추가
+            release {}
+        }
+    }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
