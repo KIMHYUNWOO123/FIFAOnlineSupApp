@@ -483,13 +483,13 @@ fun DetailView(
             }
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth(0.333f), contentAlignment = Alignment.Center) {
-                    Text(text = "${data.invoke().averageRating1} / 10.0", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "${data.invoke().averageRating1} / 5.0", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(0.5f), contentAlignment = Alignment.Center) {
                     Text(text = "경기평점", fontSize = 15.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.Center) {
-                    Text(text = "${data.invoke().averageRating2} / 10.0", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "${data.invoke().averageRating2} / 5.0", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
