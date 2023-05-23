@@ -23,7 +23,7 @@ class PagingSource(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, MatchDetailData> {
         try {
             val nextPageNumber = params.key ?: 1
-            val response = apiService.getMatchRecord1(accessId = accessId, matchType = matchType, offset = if (nextPageNumber == 0) 0 else nextPageNumber * PAGING_SIZE, PAGING_SIZE)
+            val response = apiService.getMatchRecord1(accessId = accessId, matchType = matchType, offset = if (nextPageNumber == 1) 0 else nextPageNumber * PAGING_SIZE, PAGING_SIZE)
             val prevKey = if (nextPageNumber == 1) null else nextPageNumber - 1
             val nextKey = if (response.size < PAGING_SIZE) null else (nextPageNumber + 1)
             val detailData = mutableListOf<MatchDetailData>()

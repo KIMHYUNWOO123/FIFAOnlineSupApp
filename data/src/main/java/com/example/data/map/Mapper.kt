@@ -6,8 +6,7 @@ import com.example.domain.entity.DetailMatchRecordEntity
 import com.example.domain.entity.MatchDetailData
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
+import java.time.ZoneId
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -18,10 +17,12 @@ class Mapper {
         if (list.matchInfo.size > 1) {
             val isFirst = list.matchInfo[0].accessId == accessId
             val dataList = list.matchInfo
-            val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
-            val localDateTime = LocalDateTime.parse(list.matchDate, formatter)
-            val time = localDateTime.toInstant(ZoneOffset.UTC).toEpochMilli()
-            val currentDate = System.currentTimeMillis()
+            val calendar = Calendar.getInstance()
+            val matchTime = list.matchDate.replace("T", "-").replace(":", "-")
+            val matchData = matchTime.split("-")
+            calendar.set(matchData[0].toInt(), matchData[1].toInt() - 1,matchData[2].toInt(),matchData[3].toInt(),matchData[4].toInt())
+            val time = calendar.timeInMillis
+            val currentDate = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()?.toEpochMilli() ?: System.currentTimeMillis()
             val milliseconds = currentDate - time
             val days = milliseconds / (24 * 60 * 60 * 1000)
             val hours = (milliseconds % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)
@@ -29,12 +30,13 @@ class Mapper {
             val seconds = (milliseconds % (60 * 1000)) / 1000
             val months = if (days > 30) (days / 30) else 0
             val years = if (days > 365) (days / 365) else 0
-            val matchDate: String = if (years > 1) {
+            val day = if (hours >= 24) 0 else days
+            val matchDate: String = if (years >= 1) {
                 "$years 년전"
-            } else if (months > 1) {
+            } else if (months >= 1) {
                 "$months 달전"
-            } else if (days > 1) {
-                "$days 일전"
+            } else if (day >= 1) {
+                "$day 일전"
             } else if (hours.toInt() != 0) {
                 "$hours 시간전"
             } else if (minutes.toInt() != 0) {
