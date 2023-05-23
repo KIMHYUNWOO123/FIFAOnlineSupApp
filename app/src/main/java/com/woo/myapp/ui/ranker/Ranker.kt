@@ -120,12 +120,12 @@ fun Ranker(viewModel: RankerViewModel = hiltViewModel()) {
                     )
                 }
                 Box(
-                    contentAlignment = Alignment.Center, modifier = Modifier
+                    contentAlignment = Alignment.TopCenter, modifier = Modifier
                         .padding(start = 10.dp, end = 10.dp, top = 10.dp)
                         .clip(RoundedCornerShape(20.dp))
                         .background(color = colorResource(id = R.color.app_color8))
                         .fillMaxWidth()
-                        .fillMaxHeight(0.3f)
+                        .fillMaxHeight(0.3f),
                 ) {
                     if (searchData != null) {
                         var isSelectIndex by remember {
