@@ -19,7 +19,6 @@ import coil.size.Size
 import com.woo.myapp.R
 
 
-
 @Composable
 fun LoadingBar() {
     val context = LocalContext.current
@@ -38,7 +37,7 @@ fun LoadingBar() {
             .background(Color.Transparent), contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = rememberAsyncImagePainter(ImageRequest.Builder(context).data(data = R.drawable.loadingbar_new).apply(block = {
+            painter = rememberAsyncImagePainter(ImageRequest.Builder(context).data(data = R.drawable.loadingbarnew).apply(block = {
                 size(Size.ORIGINAL)
             }).build(), imageLoader = imageLoader),
             contentDescription = null,

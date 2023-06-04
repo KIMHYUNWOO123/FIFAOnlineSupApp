@@ -130,7 +130,8 @@ fun User(
 
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(0.8f).padding(vertical = 5.dp)
+                            .fillMaxWidth(0.8f)
+                            .padding(vertical = 5.dp)
                             .clickable(interactionSource = interactionSource, indication = null) {
                                 viewModel.getUserData(text)
                                 focusManager.clearFocus()
@@ -148,7 +149,8 @@ fun User(
                         modifier = Modifier
                             .padding(15.dp)
                             .clip(RoundedCornerShape(15.dp))
-                            .background(colorResource(id = R.color.app_color4))
+//                            .background(colorResource(id = R.color.app_color4))
+                            .background(colorResource(id = R.color.app_color8))
                     ) {
                         Column {
                             Row(

@@ -122,7 +122,7 @@ fun Main(
                             ) {
                                 Spacer(modifier = Modifier.fillMaxWidth(0.05f))
                                 Text(
-                                    text = "TOP 10,000이\n자주 사용하는 선수",
+                                    text = "TOP 10,000이\n자주 사용하는 선수의\n평균스탯보기",
                                     fontSize = 25.sp,
                                     fontWeight = FontWeight.Bold,
                                     textAlign = TextAlign.Center,

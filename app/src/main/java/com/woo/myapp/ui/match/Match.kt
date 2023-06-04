@@ -136,7 +136,7 @@ fun Match(
                             LazyColumn(
                                 modifier = Modifier
                                     .padding(5.dp)
-                                    .fillMaxSize()
+                                    .fillMaxSize(),
                             ) {
                                 itemsIndexed(pagingData) { index, item ->
                                     if (item != null) {
