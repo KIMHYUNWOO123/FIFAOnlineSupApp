@@ -40,5 +40,8 @@ data class MatchDetailData(
     val validTackle1: String = "-",
     val validTackle2: String = "-",
     val mvpPlayerSpId1: String = "-",
-    val mvpPlayerSpId2: String = "-"
+    val mvpPlayerSpId2: String = "-",
+    val player1: List<Player> = emptyList(),
+    val player2: List<Player> = emptyList(),
+
 )

@@ -12,7 +12,7 @@ class DaoRepositoryImpl @Inject constructor(
         db.matchTypeDao().insertMatchType(list)
     }
 
-    override suspend fun getTypeMatch(limit : Int ): List<MatchTypeData> {
+    override suspend fun getTypeMatch(limit: Int): List<MatchTypeData> {
         return db.matchTypeDao().getMatchTypeList(limit)
     }
 
@@ -34,6 +34,10 @@ class DaoRepositoryImpl @Inject constructor(
 
     override suspend fun getSpId(): List<SpIdData> {
         return db.spIdDao().getSpId()
+    }
+
+    override suspend fun getName(id: Int): String {
+        return db.spIdDao().searchName(id)
     }
 
     override suspend fun searchSpId(name: String): List<SpIdData> {

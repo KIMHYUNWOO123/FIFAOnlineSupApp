@@ -45,6 +45,10 @@ class MetaDataUseCase @Inject constructor(
         return daoRepository.searchSpId(name)
     }
 
+    suspend fun searchName(id: Int): String {
+        return daoRepository.getName(id)
+    }
+
     suspend fun insertSeasonId(list: List<SeasonIdData>) {
         daoRepository.insertSeasonId(list)
     }

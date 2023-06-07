@@ -10,6 +10,8 @@ interface DaoRepository {
     suspend fun getDivision(): List<DivisionData>
     suspend fun insertSpId(list: List<SpIdData>)
     suspend fun getSpId(): List<SpIdData>
+
+    suspend fun getName(id: Int): String
     suspend fun searchSpId(name: String): List<SpIdData>
     suspend fun insertSeasonId(list: List<SeasonIdData>)
     suspend fun getSeasonId(): List<SeasonIdData>

@@ -20,7 +20,7 @@ class Mapper {
             val calendar = Calendar.getInstance()
             val matchTime = list.matchDate.replace("T", "-").replace(":", "-")
             val matchData = matchTime.split("-")
-            calendar.set(matchData[0].toInt(), matchData[1].toInt() - 1,matchData[2].toInt(),matchData[3].toInt(),matchData[4].toInt())
+            calendar.set(matchData[0].toInt(), matchData[1].toInt() - 1, matchData[2].toInt(), matchData[3].toInt(), matchData[4].toInt())
             val time = calendar.timeInMillis
             val currentDate = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()?.toEpochMilli() ?: System.currentTimeMillis()
             val milliseconds = currentDate - time
@@ -85,7 +85,8 @@ class Mapper {
                     maxIndex = i
                 }
             }
-//        val mvpPlayerSpId1 = dataList[0].player[maxIndex].spId
+            val mvpPlayerSpId1 = if (dataList[0].player.isEmpty()) 0 else dataList[0].player[maxIndex].spId
+            val player1 = dataList[0].player
             val result2 = when (dataList[1].matchDetail.matchEndType) { // 0: 정상종료, 1: 몰수승 ,2:몰수패
                 0 -> dataList[1].matchDetail.matchResult
                 1 -> "몰수승"
@@ -113,12 +114,13 @@ class Mapper {
             var maxIndex2 = 0
             for ((i, item) in dataList[1].player.withIndex()) {
                 val rating = item.status.spRating
-                if (rating > max) {
-                    max = rating
-                    maxIndex = i
+                if (rating > max2) {
+                    max2 = rating
+                    maxIndex2 = i
                 }
             }
-//        val mvpPlayerSpId2 = dataList[1].player[maxIndex2].spId
+            val mvpPlayerSpId2 = if (dataList[1].player.isEmpty()) 0 else dataList[1].player[maxIndex2].spId
+            val player2 = dataList[1].player
             return MatchDetailData(
                 nickname1 = nickname1,
                 nickname2 = nickname2,
@@ -155,8 +157,10 @@ class Mapper {
                 validDefence2 = validDefence2.toString(),
                 validTackle1 = validTackle1.toString(),
                 validTackle2 = validTackle2.toString(),
-                mvpPlayerSpId1 = "0",
-                mvpPlayerSpId2 = "0"
+                mvpPlayerSpId1 = mvpPlayerSpId1.toString(),
+                mvpPlayerSpId2 = mvpPlayerSpId2.toString(),
+                player1 = player1,
+                player2 = player2,
             )
         } else {
             val isFirst = list.matchInfo[0].accessId == accessId
@@ -225,6 +229,8 @@ class Mapper {
                     maxIndex = i
                 }
             }
+            val mvpPlayerSpId1 = if (dataList[0].player.isEmpty()) 0 else dataList[0].player[maxIndex].spId
+            val player1 = dataList[0].player
             return MatchDetailData(
                 nickname1 = nickname1,
                 displayGoal1 = displayGoal1.toString(),
@@ -244,8 +250,8 @@ class Mapper {
                 validPass1 = validPass1.toString(),
                 validDefence1 = validDefence1.toString(),
                 validTackle1 = validTackle1.toString(),
-                mvpPlayerSpId1 = "0",
-                mvpPlayerSpId2 = "0"
+                mvpPlayerSpId1 = mvpPlayerSpId1.toString(),
+                player1 = player1
             )
         }
     }

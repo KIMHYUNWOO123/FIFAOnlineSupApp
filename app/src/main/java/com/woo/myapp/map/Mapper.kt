@@ -212,4 +212,63 @@ class Mapper {
             createDate = date,
         )
     }
+
+    fun getSquadData(
+        player1: List<Player>,
+        player2: List<Player>,
+        mvp1: String,
+        mvp2: String,
+        spIdData: List<SpIdData>,
+        positionData: List<SpPositionData>,
+        seasonIdData: List<SeasonIdData>,
+        nickname1: String,
+        nickname2: String,
+    ): SquadData {
+        val list1 = mutableListOf<PlayerInfo>()
+        val list2 = mutableListOf<PlayerInfo>()
+        for ((i, item) in player1.withIndex()) {
+            val name = spIdData.filter { it.id == item.spId }.map { it.name }
+            val position = positionData.filter { it.spPosition == item.spPosition }.map { it.desc }
+            val grade = item.spGrade
+            val seasonImg = seasonIdData.filter { it.seasonId == item.spId.toString().substring(0 until 3).toInt() }.map { it.seasonImg }
+            val isMvp = item.spId == mvp1.toInt()
+            val pid = item.spId.toString().removeRange(0 until 3).toInt()
+            list1.add(
+                i, PlayerInfo(
+                    name = name.joinToString(),
+                    position = position.joinToString(),
+                    positionInt = item.spPosition,
+                    grade = grade,
+                    seasonImg = seasonImg.joinToString(),
+                    isMvp = isMvp,
+                    pid = pid
+                )
+            )
+        }
+        for ((i, item) in player2.withIndex()) {
+            val name = spIdData.filter { it.id == item.spId }.map { it.name }
+            val position = positionData.filter { it.spPosition == item.spPosition }.map { it.desc }
+            val grade = item.spGrade
+            val seasonImg = seasonIdData.filter { it.seasonId == item.spId.toString().substring(0 until 3).toInt() }.map { it.seasonImg }
+            val isMvp = item.spId == mvp2.toInt()
+            val pid = item.spId.toString().removeRange(0 until 3).toInt()
+            list2.add(
+                i, PlayerInfo(
+                    name = name.joinToString(),
+                    position = position.joinToString(),
+                    positionInt = item.spPosition,
+                    grade = grade,
+                    seasonImg = seasonImg.joinToString(),
+                    isMvp = isMvp,
+                    pid = pid
+                )
+            )
+        }
+        return SquadData(
+            nickname1 = nickname1,
+            nickname2 = nickname2,
+            squad1 = list1,
+            squad2 = list2,
+        )
+    }
 }

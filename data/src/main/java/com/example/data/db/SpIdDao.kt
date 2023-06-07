@@ -17,4 +17,7 @@ interface SpIdDao {
 
     @Query("SELECT * FROM spId WHERE name LIKE :name ")
     fun searchSpId(name: String): List<SpIdData>
+
+    @Query("SELECT name FROM spId WHERE id = :id")
+    fun searchName(id: Int): String
 }

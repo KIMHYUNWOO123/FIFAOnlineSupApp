@@ -2,6 +2,7 @@ package com.woo.myapp.ui.match
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,27 +14,37 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.domain.entity.MatchDetailData
 import com.example.domain.entity.MatchTypeData
+import com.example.domain.entity.PlayerInfo
 import com.woo.myapp.R
 import com.woo.myapp.utils.LoadingBar
 
@@ -321,6 +332,9 @@ fun DisplayCard(list: () -> MatchDetailData, index: Int, isExpanded: Boolean, vi
 fun DetailView(
     viewModel: MatchViewModel = hiltViewModel(), data: () -> MatchDetailData,
 ) {
+    var onSquad by remember {
+        mutableStateOf(false)
+    }
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(
             modifier = Modifier
@@ -492,6 +506,26 @@ fun DetailView(
                     Text(text = "${data.invoke().averageRating2} / 5.0", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
+            Button(
+                onClick = {
+                    onSquad = true
+                    viewModel.mapSquadList(
+                        player1 = data.invoke().player1,
+                        player2 = data.invoke().player2,
+                        mvp1 = data.invoke().mvpPlayerSpId1,
+                        mvp2 = data.invoke().mvpPlayerSpId2,
+                        nickname1 = data.invoke().nickname1,
+                        nickname2 = data.invoke().nickname2
+                    )
+                },
+            ) {
+                Text("스쿼드 보기")
+            }
+        }
+    }
+    if (onSquad) {
+        SquadDialog {
+            onSquad = false
         }
     }
 }
@@ -500,5 +534,272 @@ fun DetailView(
 fun EmptyView() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(text = "조회된 기록이 없습니다", fontSize = 15.sp)
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun SquadDialog(
+    viewModel: MatchViewModel = hiltViewModel(), onHide: () -> Unit,
+) {
+    val data by viewModel.squadData.observeAsState()
+    var isFlipped by remember { mutableStateOf(false) }
+    val onClick: () -> Unit = {
+        isFlipped = !isFlipped
+    }
+    val rotationY by animateFloatAsState(targetValue = if (isFlipped) 180f else 0f)
+    Dialog(onDismissRequest = { onHide.invoke() }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        Box(
+            modifier = Modifier
+                .graphicsLayer {
+                    this.rotationY = rotationY
+                }
+                .fillMaxSize(0.9f), contentAlignment = Alignment.Center
+        ) {
+            if (data != null) {
+                if (isFlipped) {
+                    CardView(isFlipped = isFlipped, data = { data!!.squad2 }, nickname1 = data!!.nickname2, nickname2 = data!!.nickname1, count = countSquad(data!!.squad2)) {
+                        onClick.invoke()
+                    }
+                } else {
+                    CardView(isFlipped = isFlipped, data = { data!!.squad1 }, nickname1 = data!!.nickname1, nickname2 = data!!.nickname2, count = countSquad(data!!.squad1)) {
+                        onClick.invoke()
+                    }
+                }
+            } else {
+                LoadingBar()
+            }
+        }
+    }
+}
+
+@Composable
+fun CardView(data: () -> List<PlayerInfo>, nickname1: String, nickname2: String, isFlipped: Boolean, count: List<Int>, onClick: () -> Unit) {
+    var valueCount = 0
+    count.forEach {
+        if (it != 0) {
+            valueCount += 1
+        }
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .graphicsLayer {
+                this.rotationY = if (isFlipped) 180f else 0f
+            }
+            .background(Color.White), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly
+    ) {
+        if (data.invoke().isNotEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(), contentAlignment = Alignment.Center
+            ) {
+                Text(text = "$nickname1 의 스쿼드", fontSize = 14.sp)
+            }
+            if (count[6] != 0) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(((1.0 / valueCount.toFloat()).toFloat())), contentAlignment = Alignment.Center
+                ) {
+                    LazyRow(modifier = Modifier.fillMaxSize(), userScrollEnabled = false, reverseLayout = true, horizontalArrangement = Arrangement.SpaceEvenly) {
+                        items(count = count[6]) { i ->
+                            PlayerImage(count = i + count[5] + count[4] + count[3] + count[2] + count[1] + count[0] + 1) { data.invoke() }
+                        }
+                    }
+                }
+            }
+            if (count[5] != 0) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(((1.0 / valueCount.toFloat()).toFloat())), contentAlignment = Alignment.Center
+                ) {
+                    LazyRow(modifier = Modifier.fillMaxSize(), userScrollEnabled = false, reverseLayout = true, horizontalArrangement = Arrangement.SpaceEvenly) {
+                        items(count = count[5]) { i ->
+                            PlayerImage(count = i + count[4] + count[3] + count[2] + count[1] + count[0] + 1) { data.invoke() }
+                        }
+                    }
+                }
+            }
+            if (count[4] != 0) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(((1.0 / valueCount.toFloat()).toFloat())), contentAlignment = Alignment.Center
+                ) {
+                    LazyRow(modifier = Modifier.fillMaxSize(), userScrollEnabled = false, reverseLayout = true, horizontalArrangement = Arrangement.SpaceEvenly) {
+                        items(count = count[4]) { i ->
+                            PlayerImage(count = i + count[3] + count[2] + count[1] + count[0] + 1) { data.invoke() }
+                        }
+                    }
+                }
+            }
+            if (count[3] != 0) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(((1.0 / valueCount.toFloat()).toFloat())), contentAlignment = Alignment.Center
+                ) {
+                    LazyRow(modifier = Modifier.fillMaxSize(), userScrollEnabled = false, reverseLayout = true, horizontalArrangement = Arrangement.SpaceEvenly) {
+                        items(count = count[3]) { i ->
+                            PlayerImage(count = i + count[2] + count[1] + count[0] + 1) { data.invoke() }
+                        }
+                    }
+                }
+            }
+            if (count[2] != 0) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(((1.0 / valueCount.toFloat()).toFloat())), contentAlignment = Alignment.Center
+                ) {
+                    LazyRow(modifier = Modifier.fillMaxSize(), userScrollEnabled = false, reverseLayout = true, horizontalArrangement = Arrangement.SpaceEvenly) {
+                        items(count = count[2]) { i ->
+                            PlayerImage(count = i + count[1] + count[0] + 1) { data.invoke() }
+                        }
+                    }
+                }
+            }
+            if (count[1] != 0) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(((1.0 / valueCount.toFloat()).toFloat())), contentAlignment = Alignment.Center
+                ) {
+                    LazyRow(modifier = Modifier.fillMaxSize(), userScrollEnabled = false, reverseLayout = true, horizontalArrangement = Arrangement.SpaceEvenly) {
+                        items(count = count[1]) { i ->
+                            PlayerImage(count = count[0]) { data.invoke() }
+                        }
+                    }
+                }
+            }
+            if (count[0] != 0) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(((1.0 / valueCount.toFloat()).toFloat())), contentAlignment = Alignment.Center
+                ) {
+                    LazyRow(modifier = Modifier.fillMaxSize(), userScrollEnabled = false, reverseLayout = true, horizontalArrangement = Arrangement.SpaceEvenly) {
+                        items(count = count[0]) { i ->
+                            PlayerImage(count = i + 1) { data.invoke() }
+                        }
+                    }
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(((1.0 / valueCount.toFloat()).toFloat())), contentAlignment = Alignment.Center
+            ) {
+                PlayerImage(count = 0) { data.invoke() }
+            }
+            Divider(thickness = 1.dp, color = Color.LightGray)
+            Box(contentAlignment = Alignment.Center) {
+                Button(onClick = { onClick.invoke() }) {
+                    Text(text = "$nickname2 스쿼드 보기")
+                }
+            }
+        } else {
+            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(text = "조회된 선수기록이 없습니다.", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                }
+                Box(modifier = Modifier.padding(top = 30.dp), contentAlignment = Alignment.Center) {
+                    Button(onClick = { onClick.invoke() }) {
+                        Text(text = "$nickname2 스쿼드 보기")
+                    }
+                }
+            }
+        }
+    }
+}
+
+fun countSquad(data: List<PlayerInfo>): List<Int> {
+    var fw1: Int = 0
+    var fw2: Int = 0
+    var mf1: Int = 0
+    var mf2: Int = 0
+    var mf3: Int = 0
+    var df1: Int = 0
+    var df2: Int = 0
+    for (item in data) {
+        when (item.position) {
+            "SW", "RB", "RCB", "CB", "LCB", "LB" -> df1 += 1
+            "LWB", "RWB" -> df2 += 1
+            "RDM", "CDM", "LDM" -> mf1 += 1
+            "RM", "RCM", "CM", "LCM", "LM" -> mf2 += 1
+            "RAM", "CAM", "LAM" -> mf3 += 1
+            "RF", "CF", "LF" -> fw1 += 1
+            "RW", "RS", "ST", "LS", "LW" -> fw2 += 1
+        }
+    }
+    return listOf(df1, df2, mf1, mf2, mf3, fw1, fw2)
+}
+
+@Composable
+fun PlayerImage(count: Int, data: () -> List<PlayerInfo>) {
+    val color = when (data.invoke()[count].grade) {
+        1 -> colorResource(id = R.color.basic)
+        2, 3, 4 -> colorResource(id = R.color.bronze)
+        5, 6, 7 -> colorResource(id = R.color.silver)
+        else -> colorResource(id = R.color.gold)
+    }
+    val textColor = when (data.invoke()[count].grade) {
+        1 -> colorResource(id = R.color.basicTextColor)
+        2, 3, 4 -> colorResource(id = R.color.bronzeTextColor)
+        5, 6, 7 -> colorResource(id = R.color.silverTextColor)
+        else -> colorResource(id = R.color.goldTextColor)
+    }
+    val positionColor = when (data.invoke()[count].positionInt) {
+        0 -> colorResource(id = R.color.gk)
+        in 1..8 -> colorResource(id = R.color.df)
+        in 9..19 -> colorResource(id = R.color.mf)
+        else -> colorResource(id = R.color.fw)
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize(), contentAlignment = Alignment.Center
+    ) {
+        Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Spacer(modifier = Modifier.fillMaxHeight(0.05f))
+            if (data.invoke()[count].isMvp) {
+                Image(painter = painterResource(id = R.drawable.ic_mvp), contentDescription = "null")
+            }
+            Text(text = data.invoke()[count].position, fontSize = 15.sp, color = positionColor, fontWeight = FontWeight.Bold)
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data("https://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/players/p${data.invoke()[count].pid}.png")
+                    .crossfade(true)
+                    .build(),
+                contentDescription = null,
+            )
+            Row(horizontalArrangement = Arrangement.Center) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(data.invoke()[count].seasonImg)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = null,
+                )
+                Spacer(modifier = Modifier.fillMaxWidth(0.02f))
+                Text(
+                    text = data.invoke()[count].name,
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    textAlign = TextAlign.Center,
+                    color = colorResource(id = R.color.app_color1)
+                )
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(color = color)
+                        .size(13.dp), contentAlignment = Alignment.Center
+                ) {
+                    Text(text = data.invoke()[count].grade.toString(), color = textColor, fontWeight = FontWeight.Bold, fontSize = 8.sp)
+                }
+            }
+        }
     }
 }
