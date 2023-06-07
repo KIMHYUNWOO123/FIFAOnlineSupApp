@@ -1,5 +1,6 @@
 package com.woo.myapp.ui.match
 
+import android.util.Log
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
@@ -557,6 +558,7 @@ fun SquadDialog(
                 .fillMaxSize(0.9f), contentAlignment = Alignment.Center
         ) {
             if (data != null) {
+                Log.d("###", "SquadDialog: ${data!!.squad2}")
                 if (isFlipped) {
                     CardView(isFlipped = isFlipped, data = { data!!.squad2 }, nickname1 = data!!.nickname2, nickname2 = data!!.nickname1, count = countSquad(data!!.squad2)) {
                         onClick.invoke()
@@ -581,6 +583,7 @@ fun CardView(data: () -> List<PlayerInfo>, nickname1: String, nickname2: String,
             valueCount += 1
         }
     }
+    Log.d("###", "CardView:$count ")
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -667,9 +670,11 @@ fun CardView(data: () -> List<PlayerInfo>, nickname1: String, nickname2: String,
                         .fillMaxWidth()
                         .weight(((1.0 / valueCount.toFloat()).toFloat())), contentAlignment = Alignment.Center
                 ) {
-                    LazyRow(modifier = Modifier.fillMaxSize(), userScrollEnabled = false, reverseLayout = true, horizontalArrangement = Arrangement.SpaceEvenly) {
-                        items(count = count[1]) { i ->
-                            PlayerImage(count = count[0]) { data.invoke() }
+                    LazyRow(modifier = Modifier.fillMaxSize().padding(horizontal = 5.dp), userScrollEnabled = false, reverseLayout = true, horizontalArrangement = Arrangement.SpaceBetween) {
+                        items(count = count[0] + count[1]) { i ->
+                            if (data.invoke()[i + 1].position == "RWB" || data.invoke()[i + 1].position == "LWB") {
+                                PlayerImage(count = i + 1) { data.invoke() }
+                            }
                         }
                     }
                 }
@@ -681,8 +686,10 @@ fun CardView(data: () -> List<PlayerInfo>, nickname1: String, nickname2: String,
                         .weight(((1.0 / valueCount.toFloat()).toFloat())), contentAlignment = Alignment.Center
                 ) {
                     LazyRow(modifier = Modifier.fillMaxSize(), userScrollEnabled = false, reverseLayout = true, horizontalArrangement = Arrangement.SpaceEvenly) {
-                        items(count = count[0]) { i ->
-                            PlayerImage(count = i + 1) { data.invoke() }
+                        items(count = count[0] + count[1]) { i ->
+                            if (data.invoke()[i + 1].position != "RWB" && data.invoke()[i + 1].position != "LWB") {
+                                PlayerImage(count = i + 1) { data.invoke() }
+                            }
                         }
                     }
                 }
@@ -758,46 +765,65 @@ fun PlayerImage(count: Int, data: () -> List<PlayerInfo>) {
         else -> colorResource(id = R.color.fw)
     }
     Box(
-        modifier = Modifier
-            .fillMaxSize(), contentAlignment = Alignment.Center
+        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {
-        Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(modifier = Modifier.fillMaxSize(0.98f), horizontalAlignment = Alignment.CenterHorizontally) {
             Spacer(modifier = Modifier.fillMaxHeight(0.05f))
-            if (data.invoke()[count].isMvp) {
-                Image(painter = painterResource(id = R.drawable.ic_mvp), contentDescription = "null")
+            Box(modifier = Modifier.weight(0.2f)) {
+                Row {
+                    if (data.invoke()[count].isMvp) {
+                        Image(painter = painterResource(id = R.drawable.ic_mvp), contentDescription = "null")
+                    }
+                    Text(text = data.invoke()[count].position, fontSize = 13.sp, color = positionColor, fontWeight = FontWeight.Bold)
+                }
             }
-            Text(text = data.invoke()[count].position, fontSize = 15.sp, color = positionColor, fontWeight = FontWeight.Bold)
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data("https://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/players/p${data.invoke()[count].pid}.png")
-                    .crossfade(true)
-                    .build(),
-                contentDescription = null,
-            )
-            Row(horizontalArrangement = Arrangement.Center) {
+            Box(modifier = Modifier.weight(0.5f)) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data("https://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/players/p${data.invoke()[count].pid}.png")
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .aspectRatio(1f)
+                )
+            }
+            Box(Modifier.weight(0.15f), contentAlignment = Alignment.Center) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(data.invoke()[count].seasonImg)
                         .crossfade(true)
                         .build(),
                     contentDescription = null,
-                )
-                Spacer(modifier = Modifier.fillMaxWidth(0.02f))
-                Text(
-                    text = data.invoke()[count].name,
-                    fontSize = 8.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 2,
-                    textAlign = TextAlign.Center,
-                    color = colorResource(id = R.color.app_color1)
-                )
-                Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(5.dp))
-                        .background(color = color)
-                        .size(13.dp), contentAlignment = Alignment.Center
-                ) {
-                    Text(text = data.invoke()[count].grade.toString(), color = textColor, fontWeight = FontWeight.Bold, fontSize = 8.sp)
+                        .fillMaxHeight()
+                        .aspectRatio(1f)
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .weight(0.15f)
+                    .wrapContentWidth()
+            ) {
+                Row(horizontalArrangement = Arrangement.Center) {
+                    Text(
+                        text = data.invoke()[count].name,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 2,
+                        textAlign = TextAlign.Center,
+                        color = colorResource(id = R.color.app_color1)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(5.dp))
+                            .background(color = color)
+                            .fillMaxHeight(1f)
+                            .aspectRatio(1f), contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = data.invoke()[count].grade.toString(), color = textColor, fontWeight = FontWeight.Bold, fontSize = 8.sp)
+                    }
                 }
             }
         }
