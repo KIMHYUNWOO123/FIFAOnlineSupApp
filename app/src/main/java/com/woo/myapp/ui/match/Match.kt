@@ -1,6 +1,5 @@
 package com.woo.myapp.ui.match
 
-import android.util.Log
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
@@ -16,6 +15,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -518,7 +518,12 @@ fun DetailView(
                         nickname1 = data.invoke().nickname1,
                         nickname2 = data.invoke().nickname2
                     )
-                },
+                }, colors = ButtonDefaults.buttonColors(
+                    backgroundColor = colorResource(id = R.color.app_color8),
+                    contentColor = Color.Black,
+                    disabledBackgroundColor = colorResource(id = R.color.app_color8),
+                    disabledContentColor = Color.Black
+                )
             ) {
                 Text("스쿼드 보기")
             }
@@ -558,13 +563,12 @@ fun SquadDialog(
                 .fillMaxSize(0.9f), contentAlignment = Alignment.Center
         ) {
             if (data != null) {
-                Log.d("###", "SquadDialog: ${data!!.squad2}")
                 if (isFlipped) {
-                    CardView(isFlipped = isFlipped, data = { data!!.squad2 }, nickname1 = data!!.nickname2, nickname2 = data!!.nickname1, count = countSquad(data!!.squad2)) {
+                    CardView(isFlipped = isFlipped, data = { data!!.squad2 }, nickname1 = data!!.nickname2, nickname2 = data!!.nickname1, count = countSquad(data!!.squad2), onHide = onHide) {
                         onClick.invoke()
                     }
                 } else {
-                    CardView(isFlipped = isFlipped, data = { data!!.squad1 }, nickname1 = data!!.nickname1, nickname2 = data!!.nickname2, count = countSquad(data!!.squad1)) {
+                    CardView(isFlipped = isFlipped, data = { data!!.squad1 }, nickname1 = data!!.nickname1, nickname2 = data!!.nickname2, count = countSquad(data!!.squad1), onHide = onHide) {
                         onClick.invoke()
                     }
                 }
@@ -576,14 +580,13 @@ fun SquadDialog(
 }
 
 @Composable
-fun CardView(data: () -> List<PlayerInfo>, nickname1: String, nickname2: String, isFlipped: Boolean, count: List<Int>, onClick: () -> Unit) {
+fun CardView(data: () -> List<PlayerInfo>, nickname1: String, nickname2: String, isFlipped: Boolean, count: List<Int>, onHide: () -> Unit, onClick: () -> Unit) {
     var valueCount = 0
     count.forEach {
         if (it != 0) {
             valueCount += 1
         }
     }
-    Log.d("###", "CardView:$count ")
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -597,7 +600,14 @@ fun CardView(data: () -> List<PlayerInfo>, nickname1: String, nickname2: String,
                 modifier = Modifier
                     .fillMaxWidth(), contentAlignment = Alignment.Center
             ) {
-                Text(text = "$nickname1 의 스쿼드", fontSize = 14.sp)
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                    Box(modifier = Modifier
+                        .wrapContentSize()
+                        .padding(2.dp)
+                        .clickable { onHide.invoke() })
+                    Image(painter = painterResource(id = R.drawable.baseline_cancel_24), contentDescription = null)
+                }
+                Text(text = "$nickname1 의 스쿼드", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
             }
             if (count[6] != 0) {
                 Box(
@@ -670,7 +680,11 @@ fun CardView(data: () -> List<PlayerInfo>, nickname1: String, nickname2: String,
                         .fillMaxWidth()
                         .weight(((1.0 / valueCount.toFloat()).toFloat())), contentAlignment = Alignment.Center
                 ) {
-                    LazyRow(modifier = Modifier.fillMaxSize().padding(horizontal = 5.dp), userScrollEnabled = false, reverseLayout = true, horizontalArrangement = Arrangement.SpaceBetween) {
+                    LazyRow(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 5.dp), userScrollEnabled = false, reverseLayout = true, horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
                         items(count = count[0] + count[1]) { i ->
                             if (data.invoke()[i + 1].position == "RWB" || data.invoke()[i + 1].position == "LWB") {
                                 PlayerImage(count = i + 1) { data.invoke() }
@@ -699,11 +713,22 @@ fun CardView(data: () -> List<PlayerInfo>, nickname1: String, nickname2: String,
                     .fillMaxWidth()
                     .weight(((1.0 / valueCount.toFloat()).toFloat())), contentAlignment = Alignment.Center
             ) {
-                PlayerImage(count = 0) { data.invoke() }
+                LazyRow(modifier = Modifier.fillMaxSize(), userScrollEnabled = false, reverseLayout = true, horizontalArrangement = Arrangement.Center) {
+                    items(count = 1) { i ->
+                        PlayerImage(count = 0) { data.invoke() }
+                    }
+                }
             }
             Divider(thickness = 1.dp, color = Color.LightGray)
             Box(contentAlignment = Alignment.Center) {
-                Button(onClick = { onClick.invoke() }) {
+                Button(
+                    onClick = { onClick.invoke() }, colors = ButtonDefaults.buttonColors(
+                        backgroundColor = colorResource(id = R.color.app_color6),
+                        contentColor = Color.Black,
+                        disabledBackgroundColor = colorResource(id = R.color.app_color6),
+                        disabledContentColor = Color.Black
+                    )
+                ) {
                     Text(text = "$nickname2 스쿼드 보기")
                 }
             }
@@ -713,7 +738,14 @@ fun CardView(data: () -> List<PlayerInfo>, nickname1: String, nickname2: String,
                     Text(text = "조회된 선수기록이 없습니다.", fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 }
                 Box(modifier = Modifier.padding(top = 30.dp), contentAlignment = Alignment.Center) {
-                    Button(onClick = { onClick.invoke() }) {
+                    Button(
+                        onClick = { onClick.invoke() }, colors = ButtonDefaults.buttonColors(
+                            backgroundColor = colorResource(id = R.color.app_color6),
+                            contentColor = Color.Black,
+                            disabledBackgroundColor = colorResource(id = R.color.app_color6),
+                            disabledContentColor = Color.Black
+                        )
+                    ) {
                         Text(text = "$nickname2 스쿼드 보기")
                     }
                 }
@@ -765,19 +797,14 @@ fun PlayerImage(count: Int, data: () -> List<PlayerInfo>) {
         else -> colorResource(id = R.color.fw)
     }
     Box(
-        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+        modifier = Modifier
+            .fillMaxSize(), contentAlignment = Alignment.Center
     ) {
-        Column(modifier = Modifier.fillMaxSize(0.98f), horizontalAlignment = Alignment.CenterHorizontally) {
-            Spacer(modifier = Modifier.fillMaxHeight(0.05f))
-            Box(modifier = Modifier.weight(0.2f)) {
-                Row {
-                    if (data.invoke()[count].isMvp) {
-                        Image(painter = painterResource(id = R.drawable.ic_mvp), contentDescription = "null")
-                    }
-                    Text(text = data.invoke()[count].position, fontSize = 13.sp, color = positionColor, fontWeight = FontWeight.Bold)
-                }
+        Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
+            Box(modifier = Modifier.weight(0.2f), contentAlignment = Alignment.Center) {
+                Text(text = data.invoke()[count].position, fontSize = 13.sp, color = positionColor, fontWeight = FontWeight.Bold)
             }
-            Box(modifier = Modifier.weight(0.5f)) {
+            Box(modifier = Modifier.weight(0.6f), contentAlignment = Alignment.BottomEnd) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data("https://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/players/p${data.invoke()[count].pid}.png")
@@ -788,25 +815,28 @@ fun PlayerImage(count: Int, data: () -> List<PlayerInfo>) {
                         .fillMaxHeight()
                         .aspectRatio(1f)
                 )
-            }
-            Box(Modifier.weight(0.15f), contentAlignment = Alignment.Center) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(data.invoke()[count].seasonImg)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = null,
+                Box(
                     modifier = Modifier
-                        .fillMaxHeight()
-                        .aspectRatio(1f)
-                )
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(color = color)
+                        .fillMaxHeight(0.25f)
+                        .aspectRatio(1f), contentAlignment = Alignment.Center
+                ) {
+                    Text(text = data.invoke()[count].grade.toString(), color = textColor, fontWeight = FontWeight.Bold, fontSize = 8.sp)
+                }
             }
-            Box(
-                modifier = Modifier
-                    .weight(0.15f)
-                    .wrapContentWidth()
-            ) {
-                Row(horizontalArrangement = Arrangement.Center) {
+            Box(modifier = Modifier.weight(0.2f), contentAlignment = Alignment.Center) {
+                Row {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(data.invoke()[count].seasonImg)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxHeight(0.7f)
+                            .aspectRatio(1f)
+                    )
                     Text(
                         text = data.invoke()[count].name,
                         fontSize = 9.sp,
@@ -815,15 +845,6 @@ fun PlayerImage(count: Int, data: () -> List<PlayerInfo>) {
                         textAlign = TextAlign.Center,
                         color = colorResource(id = R.color.app_color1)
                     )
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(5.dp))
-                            .background(color = color)
-                            .fillMaxHeight(1f)
-                            .aspectRatio(1f), contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = data.invoke()[count].grade.toString(), color = textColor, fontWeight = FontWeight.Bold, fontSize = 8.sp)
-                    }
                 }
             }
         }

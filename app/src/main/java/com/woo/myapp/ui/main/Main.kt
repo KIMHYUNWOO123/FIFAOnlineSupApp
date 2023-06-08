@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -78,7 +79,7 @@ fun Main(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .clip(CircleShape)
-                                .background(color = if (isPressed) colorResource(id = R.color.app_color4) else colorResource(id = R.color.app_color3))
+                                .background(color = if (isPressed) colorResource(id = R.color.app_color4) else colorResource(id = R.color.app_color7))
                                 .clickable(interactionSource = interactionSource, indication = null) {
                                     moveUser.invoke()
                                 }, contentAlignment = Alignment.Center
@@ -93,7 +94,7 @@ fun Main(
                                     text = "유저정보",
                                     fontSize = 30.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (isPressed) colorResource(id = R.color.app_color5) else colorResource(id = R.color.app_color8)
+                                    color = if (isPressed) colorResource(id = R.color.app_color5) else Color.White
                                 )
                             }
                         }
@@ -110,7 +111,7 @@ fun Main(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .clip(CircleShape)
-                                .background(color = if (isPressed) colorResource(id = R.color.app_color4) else colorResource(id = R.color.app_color3))
+                                .background(color = if (isPressed) colorResource(id = R.color.app_color4) else colorResource(id = R.color.app_color7))
                                 .clickable(interactionSource = interactionSource, indication = null) {
                                     moveRanker.invoke()
                                 }, contentAlignment = Alignment.Center
@@ -126,7 +127,7 @@ fun Main(
                                     fontSize = 25.sp,
                                     fontWeight = FontWeight.Bold,
                                     textAlign = TextAlign.Center,
-                                    color = if (isPressed) colorResource(id = R.color.app_color5) else colorResource(id = R.color.app_color8)
+                                    color = if (isPressed) colorResource(id = R.color.app_color5) else Color.White
                                 )
                             }
                         }

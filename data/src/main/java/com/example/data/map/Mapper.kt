@@ -50,7 +50,7 @@ class Mapper {
                 Collections.swap(dataList, 0, 1)
             }
             val nickname1 = dataList[0].nickname
-            val nickname2 = dataList[1].nickname ?: ""
+            val nickname2 = dataList[1].nickname
             val displayGoal1 = dataList[0].shoot.goalTotalDisplay
             val displayGoal2 = dataList[1].shoot.goalTotalDisplay
             val result1 = when (dataList[0].matchDetail.matchEndType) { // 0: 정상종료, 1: 몰수승 ,2:몰수패
@@ -196,7 +196,6 @@ class Mapper {
             }
             val nickname1 = dataList[0].nickname
             val displayGoal1 = dataList[0].shoot.goalTotalDisplay
-            val displayGoal2 = "-"
             val result1 = when (dataList[0].matchDetail.matchEndType) { // 0: 정상종료, 1: 몰수승 ,2:몰수패
                 0 -> dataList[0].matchDetail.matchResult
                 1 -> "몰수승"

@@ -151,7 +151,6 @@ class MatchViewModel @Inject constructor(
     }
 
     fun mapSquadList(player1: List<Player>, mvp1: String, player2: List<Player>, mvp2: String, nickname1: String, nickname2: String) {
-        _squadData.postValue(null)
         myMappingJob?.cancel()
         isLoading.postValue(true)
         myMappingJob = viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, t ->
