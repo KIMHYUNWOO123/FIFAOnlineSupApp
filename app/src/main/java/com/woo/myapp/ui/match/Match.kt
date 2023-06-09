@@ -1,5 +1,6 @@
 package com.woo.myapp.ui.match
 
+import android.util.Log
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
@@ -582,6 +583,14 @@ fun SquadDialog(
 @Composable
 fun CardView(data: () -> List<PlayerInfo>, nickname1: String, nickname2: String, isFlipped: Boolean, count: List<Int>, onHide: () -> Unit, onClick: () -> Unit) {
     var valueCount = 0
+    var isSw = false
+    data.invoke().forEach {
+        if (it.positionInt == 1) {
+            Log.d("###", "CardView:${it.positionInt} ")
+            valueCount += 1
+            isSw = true
+        }
+    }
     count.forEach {
         if (it != 0) {
             valueCount += 1
@@ -686,7 +695,7 @@ fun CardView(data: () -> List<PlayerInfo>, nickname1: String, nickname2: String,
                             .padding(horizontal = 5.dp), userScrollEnabled = false, reverseLayout = true, horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         items(count = count[0] + count[1]) { i ->
-                            if (data.invoke()[i + 1].position == "RWB" || data.invoke()[i + 1].position == "LWB") {
+                            if ((data.invoke()[i + 1].position == "RWB" || data.invoke()[i + 1].position == "LWB") && data.invoke()[i + 1].position != "SW") {
                                 PlayerImage(count = i + 1) { data.invoke() }
                             }
                         }
@@ -701,7 +710,22 @@ fun CardView(data: () -> List<PlayerInfo>, nickname1: String, nickname2: String,
                 ) {
                     LazyRow(modifier = Modifier.fillMaxSize(), userScrollEnabled = false, reverseLayout = true, horizontalArrangement = Arrangement.SpaceEvenly) {
                         items(count = count[0] + count[1]) { i ->
-                            if (data.invoke()[i + 1].position != "RWB" && data.invoke()[i + 1].position != "LWB") {
+                            if (data.invoke()[i + 1].position != "RWB" && data.invoke()[i + 1].position != "LWB" && data.invoke()[i + 1].position != "SW") {
+                                PlayerImage(count = i + 1) { data.invoke() }
+                            }
+                        }
+                    }
+                }
+            }
+            if (isSw) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(((1.0 / valueCount.toFloat()).toFloat())), contentAlignment = Alignment.Center
+                ) {
+                    LazyRow(modifier = Modifier.fillMaxSize(), userScrollEnabled = false, reverseLayout = true, horizontalArrangement = Arrangement.Center) {
+                        items(count = count[0] + count[1]) { i ->
+                            if (data.invoke()[i + 1].position == "SW") {
                                 PlayerImage(count = i + 1) { data.invoke() }
                             }
                         }
@@ -779,13 +803,13 @@ fun countSquad(data: List<PlayerInfo>): List<Int> {
 @Composable
 fun PlayerImage(count: Int, data: () -> List<PlayerInfo>) {
     val color = when (data.invoke()[count].grade) {
-        1 -> colorResource(id = R.color.basic)
+        0, 1 -> colorResource(id = R.color.basic)
         2, 3, 4 -> colorResource(id = R.color.bronze)
         5, 6, 7 -> colorResource(id = R.color.silver)
         else -> colorResource(id = R.color.gold)
     }
     val textColor = when (data.invoke()[count].grade) {
-        1 -> colorResource(id = R.color.basicTextColor)
+        0, 1 -> colorResource(id = R.color.basicTextColor)
         2, 3, 4 -> colorResource(id = R.color.bronzeTextColor)
         5, 6, 7 -> colorResource(id = R.color.silverTextColor)
         else -> colorResource(id = R.color.goldTextColor)
@@ -804,25 +828,30 @@ fun PlayerImage(count: Int, data: () -> List<PlayerInfo>) {
             Box(modifier = Modifier.weight(0.2f), contentAlignment = Alignment.Center) {
                 Text(text = data.invoke()[count].position, fontSize = 13.sp, color = positionColor, fontWeight = FontWeight.Bold)
             }
-            Box(modifier = Modifier.weight(0.6f), contentAlignment = Alignment.BottomEnd) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data("https://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/players/p${data.invoke()[count].pid}.png")
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .aspectRatio(1f)
-                )
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(5.dp))
-                        .background(color = color)
-                        .fillMaxHeight(0.25f)
-                        .aspectRatio(1f), contentAlignment = Alignment.Center
-                ) {
-                    Text(text = data.invoke()[count].grade.toString(), color = textColor, fontWeight = FontWeight.Bold, fontSize = 8.sp)
+            Box(modifier = Modifier.weight(0.6f), Alignment.TopEnd) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomEnd) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data("https://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/players/p${data.invoke()[count].pid}.png")
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .aspectRatio(1f)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(5.dp))
+                            .background(color = color)
+                            .fillMaxHeight(0.25f)
+                            .aspectRatio(1f), contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = data.invoke()[count].grade.toString(), color = textColor, fontWeight = FontWeight.Bold, fontSize = 8.sp)
+                    }
+                }
+                if (data.invoke()[count].isMvp) {
+                    Text(text = "mvp", fontSize = 10.sp, fontWeight = FontWeight.Black, color = colorResource(id = R.color.mvp))
                 }
             }
             Box(modifier = Modifier.weight(0.2f), contentAlignment = Alignment.Center) {

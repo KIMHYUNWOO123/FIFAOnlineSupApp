@@ -35,5 +35,6 @@
     <color name="app_color6">#AAC4FF</color>
     <color name="app_color7">#D2DAFF</color>
     <color name="app_color8">#EEF1FF</color>
+    <color name="mvp">#BDAB0B</color>
 
 </resources>
